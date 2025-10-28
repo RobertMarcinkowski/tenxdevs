@@ -66,15 +66,34 @@ The project follows standard Spring Boot conventions:
   - MockMvc is used for testing REST endpoints
 - **Configuration**: `src/main/resources/application.properties`
 
-## CI/CD
+## CI/CD Pipeline
 
 The project uses GitHub Actions for CI/CD (`.github/workflows/cicd-workflow.yml`):
-- Triggers on every push
-- Uses JDK 21 (Temurin distribution)
-- Runs `./gradlew build` which includes compilation and tests
+- **Trigger**: On every push to any branch
+- **Build environment**: Ubuntu with JDK 21 (Temurin distribution)
+- **Build steps**:
+  1. Checkout code
+  2. Run `./gradlew build` (includes compilation)
+  3. Run `./gradlew test` separately
+  4. Build Docker image and push to Docker Hub (`robm15/tenxdevs`)
+  5. Deploy to VPS via SSH
+- **Docker registries**: Pushes to Docker Hub (primary), GHCR support commented out
+- **Deployment**: Automatically deploys container to VPS (felix216.mikrus.xyz:10216) with port mapping 20216:8080
 
-## Docker Deployment
+## Docker
 
-The Dockerfile uses `eclipse-temurin:21-jre-jammy` as the base image and configures:
-- MaxRAMPercentage=75.0 for container memory optimization
-- Expects JAR file in `build/libs/` directory
+### Building locally
+```bash
+./gradlew build
+docker build -t tenxdevs .
+```
+
+### Running the container
+```bash
+docker run -d -p 8080:8080 tenxdevs
+```
+
+The Dockerfile:
+- Base image: `eclipse-temurin:21-jre-jammy`
+- JVM settings: MaxRAMPercentage=75.0 for container memory optimization
+- Expects JAR in `build/libs/` directory
