@@ -1,0 +1,117 @@
+name: Deploy Develop
+
+run-name: ${{ github.actor }} run deploy to develop environment
+
+on:
+  push:
+    branches: [ "develop" , "fix-secrets"]
+
+env:
+  REPOSITORY_NAME: tenxdevs
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+
+      - name: Check out repository code
+        uses: actions/checkout@v5
+
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: Test with Gradle
+        run: ./gradlew test
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5.8.0
+        with:
+          images: ${{ secrets.DOCKER_IMAGE_NAME }}
+#          images: |
+#            ${{ secrets.DOCKER_IMAGE_NAME }}
+#            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - run: echo "steps.push.outputs.digest is ${{ steps.push.outputs.digest }}."
+      - run: echo "steps.meta.outputs.tags is ${{ steps.meta.outputs.tags }}."
+
+#      - name: Generate artifact attestation
+#        uses: actions/attest-build-provenance@v3
+#        with:
+#          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+#          subject-digest: ${{ steps.push.outputs.digest }}
+#          push-to-registry: true
+
+      - name: Deploy to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DOCKER_TAG: ${{ steps.meta.outputs.tags }}
+          VPS_HOST_NAME: ${{ secrets.VPS_HOST_NAME }}
+          VPS_PORT_NUMBER: ${{ secrets.VPS_PORT_NUMBER }}
+          VPS_PORT_NUMBER_DEV: ${{ secrets.VPS_PORT_NUMBER_DEV }}
+          VPS_USER_NAME: ${{ secrets.VPS_USER_NAME }}
+          DOCKER_RUN_NAME: ${{ env.REPOSITORY_NAME }}_DEV
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p $VPS_PORT_NUMBER $VPS_HOST_NAME >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa -p $VPS_PORT_NUMBER $VPS_USER_NAME@$VPS_HOST_NAME << EOF
+            docker stop $DOCKER_RUN_NAME || true
+            docker rm $DOCKER_RUN_NAME || true
+            docker pull $DOCKER_TAG
+            docker run -d -p $VPS_PORT_NUMBER_DEV:8080 --name $DOCKER_RUN_NAME $DOCKER_TAG
+          EOF
+          rm -rf ~/.ssh
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
