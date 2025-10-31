@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: tenxdevs
+  datasource:
+    url: ${SUPABASE_DB_URL_PROD}
+    username: ${SUPABASE_DB_USERNAME_PROD}
+    password: ${SUPABASE_DB_PASSWORD_PROD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+#     Note: For production deployment, you might want to revert ddl-auto back to none and use proper database migrations (like Flyway or Liquibase) instead.
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
