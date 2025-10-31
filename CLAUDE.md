@@ -64,13 +64,29 @@ The project follows standard Spring Boot conventions with a layered architecture
   - Inject repositories via `@Autowired`
 - **Models** (`model/`): JPA entities annotated with `@Entity`
   - Use Jakarta Persistence annotations (`@Id`, `@GeneratedValue`, `@Column`)
+  - Example: `Experiment` entity with auto-generated ID
 - **Repositories** (`repository/`): Spring Data JPA repositories
   - Extend `JpaRepository<Entity, ID>` for CRUD operations
+  - No custom query methods needed currently
 - **Tests** (`src/test/java/eu/robm15/tenxdevs/`):
   - Controller tests use `@SpringBootTest` and `@AutoConfigureMockMvc`
   - MockMvc is used for testing REST endpoints
-- **Configuration**: `src/main/resources/application.yaml`
-  - Database: PostgreSQL on Supabase (jdbc:postgresql://db.qdsvbeviduohtkskblic.supabase.co:5432/postgres)
+  - Test pattern: `mockMvc.perform(get(...)).andExpect(...)`
+
+## Environment Configuration
+
+The application uses Spring profiles for environment-specific configuration:
+
+- **local** (`application-local.yaml`): H2 in-memory database for local development
+  - Database file path: `${H2_DB_PATH}`
+  - H2 console enabled for debugging
+- **develop** (`application-develop.yaml`): PostgreSQL (Supabase) for development environment
+  - Credentials provided via environment variables: `SUPABASE_DB_URL_DEVELOP`, `SUPABASE_DB_USERNAME_DEVELOP`, `SUPABASE_DB_PASSWORD_DEVELOP`
+  - Hibernate `ddl-auto: update` for automatic schema updates
+  - SQL logging enabled (`show-sql: true`)
+  - Uses `PhysicalNamingStrategyStandardImpl` to preserve exact table/column names
+- **prod** (`application-prod.yaml`): PostgreSQL (Supabase) for production
+  - Credentials provided via environment variables: `SUPABASE_DB_URL_PROD`, `SUPABASE_DB_USERNAME_PROD`, `SUPABASE_DB_PASSWORD_PROD`
 
 ## CI/CD Pipeline
 
@@ -87,6 +103,20 @@ The project uses GitHub Actions for CI/CD (`.github/workflows/deploy-develop.yml
 - **Deployment**: Automatically deploys container to VPS with separate dev/prod ports
   - Container name: `tenxdevs_DEV` for develop branch
   - Port mapping: VPS_PORT_NUMBER_DEV:8080
+  - Spring profile: `develop`
+  - Supabase credentials passed via environment variables
+
+### Required GitHub Secrets
+
+The following secrets must be configured in GitHub repository settings:
+- `SSH_PRIVATE_KEY`: SSH key for VPS deployment
+- `VPS_HOST_NAME`: VPS hostname
+- `VPS_PORT_NUMBER`: SSH port for VPS
+- `VPS_PORT_NUMBER_DEV`: Application port for development environment
+- `VPS_USER_NAME`: SSH username for VPS
+- `SUPABASE_DB_URL_DEVELOP`: Supabase PostgreSQL connection URL for develop
+- `SUPABASE_DB_USERNAME_DEVELOP`: Supabase database username for develop
+- `SUPABASE_DB_PASSWORD_DEVELOP`: Supabase database password for develop
 
 ## Docker
 
