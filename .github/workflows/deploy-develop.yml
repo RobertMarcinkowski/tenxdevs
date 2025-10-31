@@ -85,6 +85,9 @@ jobs:
           VPS_PORT_NUMBER_DEV: ${{ secrets.VPS_PORT_NUMBER_DEV }}
           VPS_USER_NAME: ${{ secrets.VPS_USER_NAME }}
           DOCKER_RUN_NAME: ${{ env.REPOSITORY_NAME }}_DEV
+          SUPABASE_DB_URL_DEVELOP: ${{ secrets.SUPABASE_DB_URL_DEVELOP }}
+          SUPABASE_DB_USERNAME_DEVELOP: ${{ secrets.SUPABASE_DB_USERNAME_DEVELOP }}
+          SUPABASE_DB_PASSWORD_DEVELOP: ${{ secrets.SUPABASE_DB_PASSWORD_DEVELOP }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
@@ -94,7 +97,12 @@ jobs:
             docker stop $DOCKER_RUN_NAME || true
             docker rm $DOCKER_RUN_NAME || true
             docker pull $DOCKER_TAG
-            docker run -d -p $VPS_PORT_NUMBER_DEV:8080 --name $DOCKER_RUN_NAME $DOCKER_TAG
+            docker run -d -p $VPS_PORT_NUMBER_DEV:8080 \
+              -e SPRING_PROFILES_ACTIVE=develop \
+              -e SUPABASE_DB_URL_DEVELOP="$SUPABASE_DB_URL_DEVELOP" \
+              -e SUPABASE_DB_USERNAME_DEVELOP="$SUPABASE_DB_USERNAME_DEVELOP" \
+              -e SUPABASE_DB_PASSWORD_DEVELOP="$SUPABASE_DB_PASSWORD_DEVELOP" \
+              --name $DOCKER_RUN_NAME $DOCKER_TAG
           EOF
           rm -rf ~/.ssh
 
