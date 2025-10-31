@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Spring Boot 3.5.7 web application built for the 10xDevs training certificate program. The project uses:
 - Java 21 (Temurin toolchain)
-- Gradle as the build system
+- Gradle Kotlin DSL (build.gradle.kts)
 - Spring Boot Starter Web for REST APIs
+- Spring Data JPA with PostgreSQL (Supabase)
 - JUnit 5 for testing
 
 Base package: `eu.robm15.tenxdevs`
@@ -55,30 +56,37 @@ docker build -t tenxdevs .
 
 ## Project Structure
 
-The project follows standard Spring Boot conventions:
+The project follows standard Spring Boot conventions with a layered architecture:
 
 - **Main application entry point**: `src/main/java/eu/robm15/tenxdevs/TenxdevsApplication.java`
-- **Controllers**: `src/main/java/eu/robm15/tenxdevs/controller/`
-  - REST controllers are annotated with `@RestController`
-  - Endpoints use Spring Web annotations (`@GetMapping`, etc.)
-- **Tests**: `src/test/java/eu/robm15/tenxdevs/`
+- **Controllers** (`controller/`): REST endpoints annotated with `@RestController`
+  - Use Spring Web annotations (`@GetMapping`, `@RequestParam`, etc.)
+  - Inject repositories via `@Autowired`
+- **Models** (`model/`): JPA entities annotated with `@Entity`
+  - Use Jakarta Persistence annotations (`@Id`, `@GeneratedValue`, `@Column`)
+- **Repositories** (`repository/`): Spring Data JPA repositories
+  - Extend `JpaRepository<Entity, ID>` for CRUD operations
+- **Tests** (`src/test/java/eu/robm15/tenxdevs/`):
   - Controller tests use `@SpringBootTest` and `@AutoConfigureMockMvc`
   - MockMvc is used for testing REST endpoints
-- **Configuration**: `src/main/resources/application.properties`
+- **Configuration**: `src/main/resources/application.yaml`
+  - Database: PostgreSQL on Supabase (jdbc:postgresql://db.qdsvbeviduohtkskblic.supabase.co:5432/postgres)
 
 ## CI/CD Pipeline
 
-The project uses GitHub Actions for CI/CD (`.github/workflows/cicd-workflow.yml`):
-- **Trigger**: On every push to any branch
+The project uses GitHub Actions for CI/CD (`.github/workflows/deploy-develop.yml`):
+- **Trigger**: On push to `develop` branch
 - **Build environment**: Ubuntu with JDK 21 (Temurin distribution)
 - **Build steps**:
   1. Checkout code
   2. Run `./gradlew build` (includes compilation)
   3. Run `./gradlew test` separately
-  4. Build Docker image and push to Docker Hub (`robm15/tenxdevs`)
+  4. Build Docker image and push to GitHub Container Registry (GHCR)
   5. Deploy to VPS via SSH
-- **Docker registries**: Pushes to Docker Hub (primary), GHCR support commented out
-- **Deployment**: Automatically deploys container to VPS (felix216.mikrus.xyz:10216) with port mapping 20216:8080
+- **Docker registry**: GitHub Container Registry (`ghcr.io`)
+- **Deployment**: Automatically deploys container to VPS with separate dev/prod ports
+  - Container name: `tenxdevs_DEV` for develop branch
+  - Port mapping: VPS_PORT_NUMBER_DEV:8080
 
 ## Docker
 
