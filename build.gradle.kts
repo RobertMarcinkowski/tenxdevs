@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "eu.robm15"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.3-SNAPSHOT"
 description = "Project for 10xDevs training"
 
 java {
