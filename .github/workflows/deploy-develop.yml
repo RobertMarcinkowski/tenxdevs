@@ -253,6 +253,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+
       - name: Delete merged branch
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
