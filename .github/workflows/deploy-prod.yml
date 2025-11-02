@@ -249,3 +249,90 @@ jobs:
           rm -rf ~/.ssh
 
       - run: echo "This job's status is ${{ job.status }}."
+
+  bump-version:
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Get deployed version and calculate next version
+        id: next-version
+        run: |
+          # Get version from main (the version that was just deployed)
+          git fetch origin main
+          git checkout origin/main -- build.gradle.kts
+          DEPLOYED_VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
+          echo "Deployed version: $DEPLOYED_VERSION"
+
+          # Switch back to develop's build.gradle.kts
+          git checkout develop -- build.gradle.kts
+
+          # Remove -SNAPSHOT if present from deployed version
+          BASE_VERSION="${DEPLOYED_VERSION%-SNAPSHOT}"
+
+          # Split version into components and increment patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+          PATCH=$((PATCH + 1))
+          NEXT_VERSION="$MAJOR.$MINOR.$PATCH-SNAPSHOT"
+
+          echo "Next version for develop: $NEXT_VERSION"
+          echo "next-version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "deployed-version=$DEPLOYED_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create version bump branch
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git checkout -b chore/bump-version-to-${{ steps.next-version.outputs.next-version }}
+
+      - name: Update version in build.gradle.kts
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ steps.next-version.outputs.next-version }}"/' build.gradle.kts
+          cat build.gradle.kts | grep "^version"
+
+      - name: Commit version bump
+        run: |
+          git add build.gradle.kts
+          git commit -m "chore: bump version to ${{ steps.next-version.outputs.next-version }} [skip ci]"
+          git push origin chore/bump-version-to-${{ steps.next-version.outputs.next-version }}
+
+      - name: Create PR to develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base develop \
+            --head chore/bump-version-to-${{ steps.next-version.outputs.next-version }} \
+            --title "chore: bump version to ${{ steps.next-version.outputs.next-version }}" \
+            --body "## Version Bump to Develop
+
+          This PR bumps the develop branch version after successful deployment of v${{ steps.next-version.outputs.deployed-version }} to production.
+
+          ### Changes
+          - Updated version in build.gradle.kts to \`${{ steps.next-version.outputs.next-version }}\`
+
+          ### Notes
+          - Main branch remains at \`${{ steps.next-version.outputs.deployed-version }}\` (last released version)
+          - Develop branch will be at \`${{ steps.next-version.outputs.next-version }}\` (preparing for next release)
+          - Merge this PR to continue development on the next version
+
+          ---
+          _This PR was automatically created after successful production deployment_"
