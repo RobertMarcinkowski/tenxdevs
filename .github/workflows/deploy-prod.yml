@@ -275,6 +275,29 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: develop
+          fetch-depth: 0
+
+      - name: Merge main into develop
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          echo "Fetching latest main branch..."
+          git fetch origin main
+
+          echo "Current branch: $(git branch --show-current)"
+          echo "Merging main into develop..."
+
+          # Merge main into develop to sync release changes
+          git merge origin/main --no-edit -m "chore: merge main into develop after release"
+
+          echo "Merge completed successfully"
+
+          # Push the merge to develop
+          echo "Pushing merge to develop..."
+          git push origin develop
+
+          echo "Merge pushed to develop"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -285,20 +308,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Get deployed version and calculate next version
+      - name: Calculate next version
         id: next-version
         run: |
-          # Get version from main (the version that was just deployed)
-          git fetch origin main
-          git checkout origin/main -- build.gradle.kts
-          DEPLOYED_VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
-          echo "Deployed version: $DEPLOYED_VERSION"
+          # Get current version from develop (which now has the released version after merge)
+          CURRENT_VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
+          echo "Current version after merge: $CURRENT_VERSION"
 
-          # Switch back to develop's build.gradle.kts
-          git checkout develop -- build.gradle.kts
-
-          # Remove -SNAPSHOT if present from deployed version
-          BASE_VERSION="${DEPLOYED_VERSION%-SNAPSHOT}"
+          # Remove -SNAPSHOT if present (released version shouldn't have it, but just in case)
+          BASE_VERSION="${CURRENT_VERSION%-SNAPSHOT}"
+          echo "Base version: $BASE_VERSION"
 
           # Split version into components and increment patch
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
@@ -307,7 +326,7 @@ jobs:
 
           echo "Next version for develop: $NEXT_VERSION"
           echo "next-version=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "deployed-version=$DEPLOYED_VERSION" >> $GITHUB_OUTPUT
+          echo "deployed-version=$BASE_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create version bump branch
         run: |
