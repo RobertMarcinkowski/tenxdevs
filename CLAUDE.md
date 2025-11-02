@@ -41,6 +41,12 @@ On Windows: `gradlew.bat build`
 ./gradlew bootRun
 ```
 
+### Running with a specific Spring profile
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+Set `H2_DB_PATH` environment variable when using local profile (e.g., `./data/testdb`)
+
 ### Creating a JAR file
 ```bash
 ./gradlew bootJar
@@ -90,17 +96,32 @@ The application uses Spring profiles for environment-specific configuration:
 
 ## CI/CD Pipeline
 
-The project uses GitHub Actions for CI/CD (`.github/workflows/deploy-develop.yml`):
-- **Trigger**: On push to `develop` branch
+The project uses GitHub Actions with two workflows:
+
+### Pull Request Testing (`.github/workflows/test-pr.yml`)
+- **Trigger**: On pull requests to `develop` or `main` branches
+- **Purpose**: Validates code changes before merging
 - **Build environment**: Ubuntu with JDK 21 (Temurin distribution)
-- **Build steps**:
-  1. Checkout code
-  2. Run `./gradlew build` (includes compilation)
-  3. Run `./gradlew test` separately
-  4. Build Docker image and push to GitHub Container Registry (GHCR)
-  5. Deploy to VPS via SSH
+- **Jobs** (sequential):
+  1. **build**: Compiles project with `./gradlew build`, uploads JAR as artifact (7-day retention)
+  2. **test**: Runs `./gradlew test` to verify all tests pass
+- No deployment or release steps - only validation
+
+### Deployment Pipeline (`.github/workflows/deploy-develop.yml`)
+- **Trigger**: On pull request closure to `develop` branch (only runs if PR is merged)
+- **Build environment**: Ubuntu with JDK 21 (Temurin distribution)
+- **Pipeline jobs** (sequential):
+  1. **build**: Compiles project with `./gradlew build`, extracts version, uploads JAR as artifact
+  2. **test**: Runs `./gradlew test` to verify all tests pass
+  3. **release**: Creates/updates GitHub Release with JAR artifact as pre-release
+     - Deletes existing tag/release if present to enable re-deployment
+     - Tags format: `v{version}` (e.g., `v0.0.1-SNAPSHOT`)
+  4. **package**: Downloads JAR artifact, builds Docker image, pushes to GHCR
+     - Adds custom labels: jar-version, git-commit, git-branch, build-date
+  5. **deploy**: Pulls Docker image and deploys to VPS via SSH
+  6. **cleanup**: Automatically deletes the merged source branch after successful deployment
 - **Docker registry**: GitHub Container Registry (`ghcr.io`)
-- **Deployment**: Automatically deploys container to VPS with separate dev/prod ports
+- **Deployment**: Automatically deploys container to VPS
   - Container name: `tenxdevs_DEV` for develop branch
   - Port mapping: VPS_PORT_NUMBER_DEV:8080
   - Spring profile: `develop`
@@ -129,6 +150,16 @@ docker build -t tenxdevs .
 ### Running the container
 ```bash
 docker run -d -p 8080:8080 tenxdevs
+```
+
+### Running with environment variables (for develop/prod profiles)
+```bash
+docker run -d -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=develop \
+  -e SUPABASE_DB_URL_DEVELOP="jdbc:postgresql://..." \
+  -e SUPABASE_DB_USERNAME_DEVELOP="username" \
+  -e SUPABASE_DB_PASSWORD_DEVELOP="password" \
+  --name tenxdevs_DEV tenxdevs
 ```
 
 The Dockerfile:
