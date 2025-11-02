@@ -5,15 +5,10 @@ run-name: ${{ github.actor }} is preparing a release
 on:
   workflow_dispatch:
     inputs:
-      version-bump:
-        description: 'Version bump type'
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-        default: 'patch'
+      release-version:
+        description: 'Release version number (e.g., 1.0.0, 2.1.3). Leave empty to use current version without -SNAPSHOT'
+        required: false
+        type: string
 
 env:
   REPOSITORY_NAME: tenxdevs
@@ -41,36 +36,49 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Calculate new version
+      - name: Validate and set release version
         id: version
         run: |
           # Get current version from build.gradle.kts
           CURRENT_VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
           echo "Current version: $CURRENT_VERSION"
 
-          # Remove -SNAPSHOT if present
-          BASE_VERSION="${CURRENT_VERSION%-SNAPSHOT}"
+          # Remove -SNAPSHOT from current version
+          CURRENT_BASE="${CURRENT_VERSION%-SNAPSHOT}"
+          echo "Current base version: $CURRENT_BASE"
 
-          # Split version into components
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+          # Get user-provided release version or use current base version
+          INPUT_VERSION="${{ github.event.inputs.release-version }}"
 
-          # Increment based on user input
-          case "${{ github.event.inputs.version-bump }}" in
-            major)
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-              ;;
-            minor)
-              MINOR=$((MINOR + 1))
-              PATCH=0
-              ;;
-            patch)
-              PATCH=$((PATCH + 1))
-              ;;
-          esac
+          if [ -z "$INPUT_VERSION" ]; then
+            # No input provided, use current version without -SNAPSHOT
+            RELEASE_VERSION="$CURRENT_BASE"
+            echo "No version provided, using current base version: $RELEASE_VERSION"
+          else
+            # User provided a version, validate it
+            RELEASE_VERSION="$INPUT_VERSION"
+            echo "Requested release version: $RELEASE_VERSION"
 
-          RELEASE_VERSION="$MAJOR.$MINOR.$PATCH"
+            # Validate version format (must be X.Y.Z where X, Y, Z are numbers)
+            if ! [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Error: Invalid version format. Must be in format X.Y.Z (e.g., 1.0.0, 2.1.3)"
+              exit 1
+            fi
+
+            # Split versions for comparison
+            IFS='.' read -r CURR_MAJOR CURR_MINOR CURR_PATCH <<< "$CURRENT_BASE"
+            IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "$RELEASE_VERSION"
+
+            # Compare versions and show warnings
+            if [ "$NEW_MAJOR" -lt "$CURR_MAJOR" ]; then
+              echo "Warning: New major version ($NEW_MAJOR) is less than current ($CURR_MAJOR)"
+            elif [ "$NEW_MAJOR" -eq "$CURR_MAJOR" ] && [ "$NEW_MINOR" -lt "$CURR_MINOR" ]; then
+              echo "Warning: New minor version ($NEW_MINOR) is less than current ($CURR_MINOR)"
+            elif [ "$NEW_MAJOR" -eq "$CURR_MAJOR" ] && [ "$NEW_MINOR" -eq "$CURR_MINOR" ] && [ "$NEW_PATCH" -lt "$CURR_PATCH" ]; then
+              echo "Warning: New patch version ($NEW_PATCH) is less than current ($CURR_PATCH)"
+            fi
+          fi
+
           echo "Release version: $RELEASE_VERSION"
           echo "release-version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
 
