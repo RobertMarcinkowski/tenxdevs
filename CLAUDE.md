@@ -96,7 +96,7 @@ The application uses Spring profiles for environment-specific configuration:
 
 ## CI/CD Pipeline
 
-The project uses GitHub Actions with two workflows:
+The project uses GitHub Actions with four workflows:
 
 ### Pull Request Testing (`.github/workflows/test-pr.yml`)
 - **Trigger**: On pull requests to `develop` or `main` branches
@@ -107,7 +107,19 @@ The project uses GitHub Actions with two workflows:
   2. **test**: Runs `./gradlew test` to verify all tests pass
 - No deployment or release steps - only validation
 
-### Deployment Pipeline (`.github/workflows/deploy-develop.yml`)
+### Prepare Release (`.github/workflows/prepare-release.yml`)
+- **Trigger**: Manual workflow dispatch
+- **Purpose**: Creates a release PR from `develop` to `main`
+- **Input**: Optional release version (e.g., `1.0.0`). If not provided, removes `-SNAPSHOT` from current version
+- **Pipeline jobs**:
+  1. **create-release-pr**: Creates release branch, updates version in `build.gradle.kts`, creates PR to `main`
+     - Validates version format (must be `X.Y.Z`)
+     - Creates branch `release/vX.Y.Z`
+     - Removes `-SNAPSHOT` suffix from version
+     - Opens PR with release checklist
+- After the PR is merged to `main`, the production deployment workflow triggers automatically
+
+### Development Deployment (`.github/workflows/deploy-develop.yml`)
 - **Trigger**: On pull request closure to `develop` branch (only runs if PR is merged)
 - **Build environment**: Ubuntu with JDK 21 (Temurin distribution)
 - **Pipeline jobs** (sequential):
@@ -119,13 +131,41 @@ The project uses GitHub Actions with two workflows:
   4. **package**: Downloads JAR artifact, builds Docker image, pushes to GHCR
      - Adds custom labels: jar-version, git-commit, git-branch, build-date
   5. **deploy**: Pulls Docker image and deploys to VPS via SSH
-  6. **cleanup**: Automatically deletes the merged source branch after successful deployment
 - **Docker registry**: GitHub Container Registry (`ghcr.io`)
 - **Deployment**: Automatically deploys container to VPS
-  - Container name: `tenxdevs_DEV` for develop branch
+  - Container name: `tenxdevs_DEV`
   - Port mapping: VPS_PORT_NUMBER_DEV:8080
   - Spring profile: `develop`
   - Supabase credentials passed via environment variables
+- **Note**: Merged branches are automatically deleted by GitHub repository setting
+
+### Production Deployment (`.github/workflows/deploy-prod.yml`)
+- **Trigger**: On pull request closure to `main` branch (only runs if PR is merged)
+- **Build environment**: Ubuntu with JDK 21 (Temurin distribution)
+- **Pipeline jobs** (sequential):
+  1. **build**: Compiles project, extracts version (strips `-SNAPSHOT`), uploads JAR artifact
+  2. **test**: Runs `./gradlew test` to verify all tests pass
+  3. **release**: Creates GitHub Release (not pre-release) with JAR artifact
+     - Tags format: `vX.Y.Z` (without `-SNAPSHOT`)
+     - Marked as latest release
+  4. **package**: Builds and pushes Docker image to GHCR with production version tag
+  5. **deploy**: Deploys to production VPS
+     - Container name: `tenxdevs_PROD`
+     - Port mapping: VPS_PORT_NUMBER_PROD:8080
+     - Spring profile: `prod`
+  6. **bump-version**: After successful deployment
+     - Merges `main` into `develop`
+     - Increments patch version and adds `-SNAPSHOT`
+     - Creates PR to `develop` with version bump (e.g., `0.0.5-SNAPSHOT` → `0.0.6-SNAPSHOT`)
+
+### Release Process Flow
+
+Standard workflow for releases:
+1. Develop features on feature branches → merge to `develop` → auto-deploy to DEV environment
+2. When ready for production: trigger **Prepare Release** workflow (manual)
+3. Review and merge the release PR to `main`
+4. **Production Deployment** triggers automatically
+5. After deployment, version is auto-bumped on `develop` for next iteration
 
 ### Required GitHub Secrets
 
@@ -134,10 +174,14 @@ The following secrets must be configured in GitHub repository settings:
 - `VPS_HOST_NAME`: VPS hostname
 - `VPS_PORT_NUMBER`: SSH port for VPS
 - `VPS_PORT_NUMBER_DEV`: Application port for development environment
+- `VPS_PORT_NUMBER_PROD`: Application port for production environment
 - `VPS_USER_NAME`: SSH username for VPS
 - `SUPABASE_DB_URL_DEVELOP`: Supabase PostgreSQL connection URL for develop
 - `SUPABASE_DB_USERNAME_DEVELOP`: Supabase database username for develop
 - `SUPABASE_DB_PASSWORD_DEVELOP`: Supabase database password for develop
+- `SUPABASE_DB_URL_PROD`: Supabase PostgreSQL connection URL for production
+- `SUPABASE_DB_USERNAME_PROD`: Supabase database username for production
+- `SUPABASE_DB_PASSWORD_PROD`: Supabase database password for production
 
 ## Docker
 
