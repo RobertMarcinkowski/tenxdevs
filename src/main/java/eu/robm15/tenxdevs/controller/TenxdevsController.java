@@ -13,12 +13,17 @@ public class TenxdevsController {
     @Autowired
     private ExperimentRepository experimentRepository;
 
+    @GetMapping("/")
+    public String landingPage() {
+        return "Tenxdevs landing page v 01";
+    }
+
     @GetMapping("/tenxdevs")
     public String tenxdevs(@RequestParam(value = "name", defaultValue = "World") String name) {
         var exp = new Experiment();
         exp.setName(name);
         experimentRepository.save(exp);
-        return String.format("Docker test 8. Hello %s!", name);
+        return String.format("Docker test 9. Hello %s!", name);
     }
 
 }
