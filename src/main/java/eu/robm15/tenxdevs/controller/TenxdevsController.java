@@ -13,6 +13,11 @@ public class TenxdevsController {
     @Autowired
     private ExperimentRepository experimentRepository;
 
+    @GetMapping("/")
+    public String landingPage() {
+        return "Tenxdevs landing page";
+    }
+
     @GetMapping("/tenxdevs")
     public String tenxdevs(@RequestParam(value = "name", defaultValue = "World") String name) {
         var exp = new Experiment();
