@@ -18,7 +18,7 @@ public class TenxdevsController {
         var exp = new Experiment();
         exp.setName(name);
         experimentRepository.save(exp);
-        return String.format("Docker test 7. Hello %s!", name);
+        return String.format("Docker test 8. Hello %s!", name);
     }
 
 }

@@ -19,12 +19,12 @@ public class TenxdevsControllerTest {
 
     @Test
     void tenxdevsDefault() throws Exception {
-        mockMvc.perform(get("/tenxdevs")).andExpect(status().isOk()).andExpect(content().string("Docker test 7. Hello World!"));
+        mockMvc.perform(get("/tenxdevs")).andExpect(status().isOk()).andExpect(content().string("Docker test 8. Hello World!"));
     }
 
     @Test
     void tenxdevsWithProperty() throws Exception {
-        mockMvc.perform(get("/tenxdevs").param("name", "Robert")).andExpect(status().isOk()).andExpect(content().string("Docker test 7. Hello Robert!"));
+        mockMvc.perform(get("/tenxdevs").param("name", "Robert")).andExpect(status().isOk()).andExpect(content().string("Docker test 8. Hello Robert!"));
     }
 
 }
