@@ -13,3 +13,8 @@ spring:
   h2:
     console:
       enabled: true
+
+supabase:
+  url: ${SUPABASE_URL_LOCAL:http://localhost:54321}
+  anon-key: ${SUPABASE_ANON_KEY_LOCAL}
+  jwt-secret: ${SUPABASE_JWT_SECRET_LOCAL}

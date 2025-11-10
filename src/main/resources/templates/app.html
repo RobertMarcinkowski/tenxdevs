@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App - Tenxdevs</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,6 +29,9 @@
             background-color: #e9ecef;
             border-radius: 4px;
         }
+        .user-info p {
+            margin: 8px 0;
+        }
         .logout-button {
             background-color: #dc3545;
             color: white;
@@ -36,26 +40,187 @@
             border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
-            text-decoration: none;
         }
         .logout-button:hover {
             background-color: #c82333;
         }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .api-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .api-section h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .api-result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button.test-api {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button.test-api:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="app-content" class="container" style="display: none;">
         <h1>Welcome to Tenxdevs App!</h1>
 
         <div class="user-info">
-            <p>You are logged in as: <strong sec:authentication="name">User</strong></p>
+            <p><strong>User Information:</strong></p>
+            <p>Email: <strong id="user-email">Loading...</strong></p>
+            <p>User ID: <span id="user-id">Loading...</span></p>
+            <p>Role: <span id="user-role">Loading...</span></p>
         </div>
 
-        <p>This is a protected area. You successfully logged in!</p>
+        <p>This is a protected area. You successfully logged in with Supabase!</p>
 
-        <form th:action="@{/logout}" method="post">
-            <button type="submit" class="logout-button">Logout</button>
-        </form>
+        <button class="logout-button" onclick="handleLogout()">Logout</button>
+
+        <div class="api-section">
+            <h2>Test Protected API</h2>
+            <p>Click the button below to test a protected API endpoint with your JWT token:</p>
+            <button class="test-api" onclick="testProtectedApi()">Test /api/auth/me</button>
+            <div id="api-result" class="api-result" style="display: none;"></div>
+        </div>
     </div>
+
+    <div id="loading" class="container loading">
+        <h2>Checking authentication...</h2>
+    </div>
+
+    <div id="error" class="container" style="display: none;">
+        <div class="error">
+            <strong>Authentication Required</strong>
+            <p>You need to log in to access this page.</p>
+            <p><a href="/login">Go to Login</a></p>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Get Supabase configuration
+        const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
+        const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
+
+        // Initialize Supabase client
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Check authentication on page load
+        async function checkAuth() {
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const appContent = document.getElementById('app-content');
+
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+                if (error || !session) {
+                    // Not authenticated, redirect to login
+                    loadingDiv.style.display = 'none';
+                    errorDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                    return;
+                }
+
+                // Authenticated, show user info
+                const user = session.user;
+                document.getElementById('user-email').textContent = user.email || 'N/A';
+                document.getElementById('user-id').textContent = user.id || 'N/A';
+                document.getElementById('user-role').textContent = user.role || 'user';
+
+                loadingDiv.style.display = 'none';
+                appContent.style.display = 'block';
+
+            } catch (err) {
+                console.error('Authentication check failed:', err);
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Logout handler
+        async function handleLogout() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+
+                // Clear local storage
+                localStorage.removeItem('supabase_token');
+
+                // Redirect to landing page
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                alert('Logout failed: ' + error.message);
+            }
+        }
+
+        // Test protected API endpoint
+        async function testProtectedApi() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Loading...';
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+
+                if (!session) {
+                    throw new Error('No session found');
+                }
+
+                const response = await fetch('/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Run authentication check on page load
+        checkAuth();
+    </script>
 </body>
 </html>

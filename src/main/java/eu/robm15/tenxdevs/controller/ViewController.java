@@ -21,6 +21,11 @@ public class ViewController {
         return "login";
     }
 
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
+
     @GetMapping("/app")
     public String app() {
         return "app";

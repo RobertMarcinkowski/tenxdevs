@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Tenxdevs</title>
+    <title>Register - Tenxdevs</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
@@ -16,7 +16,7 @@
             background-color: #f5f5f5;
             padding: 20px;
         }
-        .login-container {
+        .register-container {
             background-color: white;
             padding: 40px;
             border-radius: 8px;
@@ -49,7 +49,7 @@
         }
         button {
             width: 100%;
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             padding: 12px;
             border: none;
@@ -59,7 +59,7 @@
             margin-top: 10px;
         }
         button:hover:not(:disabled) {
-            background-color: #0056b3;
+            background-color: #218838;
         }
         button:disabled {
             opacity: 0.6;
@@ -102,16 +102,21 @@
             margin-top: 10px;
             color: #666;
         }
+        .password-strength {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Login</h2>
+    <div class="register-container">
+        <h2>Create Account</h2>
 
         <div id="error-message" class="error"></div>
         <div id="success-message" class="success"></div>
 
-        <form id="login-form">
+        <form id="register-form">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required autofocus>
@@ -119,15 +124,21 @@
 
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required minlength="6">
+                <div class="password-strength">Minimum 6 characters</div>
             </div>
 
-            <button type="submit" id="login-button">Sign in</button>
-            <div class="loading" id="loading">Signing in...</div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+
+            <button type="submit" id="register-button">Sign up</button>
+            <div class="loading" id="loading">Creating account...</div>
         </form>
 
         <div class="info">
-            <p>Don't have an account? <a href="/register">Sign up</a></p>
+            <p>Already have an account? <a href="/login">Sign in</a></p>
             <p><a href="/">Back to home</a></p>
         </div>
     </div>
@@ -149,13 +160,14 @@
             }
         });
 
-        // Handle login form submission
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        // Handle register form submission
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const loginButton = document.getElementById('login-button');
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const registerButton = document.getElementById('register-button');
             const loading = document.getElementById('loading');
             const errorDiv = document.getElementById('error-message');
             const successDiv = document.getElementById('success-message');
@@ -164,12 +176,26 @@
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
 
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters long.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             // Disable button and show loading
-            loginButton.disabled = true;
+            registerButton.disabled = true;
             loading.style.display = 'block';
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                 });
@@ -178,23 +204,27 @@
                     throw error;
                 }
 
-                // Store the session token
-                const session = data.session;
-                if (session) {
-                    localStorage.setItem('supabase_token', session.access_token);
+                // Show success message
+                successDiv.textContent = 'Account created successfully! ';
 
-                    // Show success and redirect
-                    successDiv.textContent = 'Login successful! Redirecting...';
-                    successDiv.style.display = 'block';
-
-                    setTimeout(() => {
-                        window.location.href = '/app';
-                    }, 1000);
+                // Check if email confirmation is required
+                if (data.user && !data.session) {
+                    successDiv.textContent += 'Please check your email to confirm your account.';
+                } else {
+                    successDiv.textContent += 'Redirecting to login...';
                 }
+
+                successDiv.style.display = 'block';
+
+                // Redirect to login after 3 seconds
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 3000);
+
             } catch (error) {
-                errorDiv.textContent = error.message || 'Login failed. Please try again.';
+                errorDiv.textContent = error.message || 'Registration failed. Please try again.';
                 errorDiv.style.display = 'block';
-                loginButton.disabled = false;
+                registerButton.disabled = false;
                 loading.style.display = 'none';
             }
         });
