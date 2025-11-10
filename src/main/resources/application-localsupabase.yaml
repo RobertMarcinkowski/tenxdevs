@@ -2,9 +2,9 @@ spring:
   application:
     name: tenxdevs
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/postgres
-    username: postgres.your-tenant-id
-    password: your-super-secret-and-long-postgres-password
+    url: ${SUPABASE_DB_URL_LOCAL}
+    username: ${SUPABASE_DB_USERNAME_LOCAL}
+    password: ${SUPABASE_DB_PASSWORD_LOCAL}
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true

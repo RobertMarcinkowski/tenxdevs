@@ -13,9 +13,9 @@ public class TenxdevsController {
     @Autowired
     private ExperimentRepository experimentRepository;
 
-    @GetMapping("/")
-    public String landingPage() {
-        return "Tenxdevs landing page v 01";
+    @GetMapping("/api/status")
+    public String status() {
+        return "Tenxdevs API v 01";
     }
 
     @GetMapping("/tenxdevs")
