@@ -8,7 +8,8 @@ This is a Spring Boot 3.5.7 web application built for the 10xDevs training certi
 - Java 21 (Temurin toolchain)
 - Gradle Kotlin DSL (build.gradle.kts)
 - Spring Boot Starter Web for REST APIs
-- Spring Data JPA with PostgreSQL (Supabase)
+- Spring Data JPA with PostgreSQL (Supabase) and H2 (local development)
+- Spring Security with Thymeleaf templates
 - JUnit 5 for testing
 
 Base package: `eu.robm15.tenxdevs`
@@ -43,15 +44,20 @@ On Windows: `gradlew.bat build`
 
 ### Running with a specific Spring profile
 ```bash
-./gradlew bootRun --args='--spring.profiles.active=local'
+./gradlew bootRun --args='--spring.profiles.active=localh2'
 ```
-Set `H2_DB_PATH` environment variable when using local profile (e.g., `./data/testdb`)
+Set `H2_DB_PATH` environment variable when using localh2 profile (e.g., `./data/testdb`)
+
+For local testing with Supabase:
+```bash
+./gradlew bootRun --args='--spring.profiles.active=localsupabase'
+```
 
 ### Creating a JAR file
 ```bash
 ./gradlew bootJar
 ```
-Output: `build/libs/tenxdevs-0.0.1-SNAPSHOT.jar`
+Output: `build/libs/tenxdevs-{version}.jar` (e.g., `tenxdevs-0.0.7-SNAPSHOT.jar`)
 
 ### Building Docker image
 The Dockerfile expects the JAR to be built first:
@@ -83,9 +89,14 @@ The project follows standard Spring Boot conventions with a layered architecture
 
 The application uses Spring profiles for environment-specific configuration:
 
-- **local** (`application-local.yaml`): H2 in-memory database for local development
-  - Database file path: `${H2_DB_PATH}`
-  - H2 console enabled for debugging
+- **localh2** (`application-localh2.yaml`): H2 file-based database for local development
+  - Database file path: `${H2_DB_PATH}` (e.g., `./data/testdb`)
+  - H2 console enabled at `/h2-console` for debugging
+  - Hibernate `ddl-auto: update` for automatic schema updates
+- **localsupabase** (`application-localsupabase.yaml`): Local PostgreSQL connection for testing with Supabase
+  - Connects to localhost:5432 with hardcoded credentials (for local testing only)
+  - SQL logging enabled (`show-sql: true`)
+  - Uses `PhysicalNamingStrategyStandardImpl` to preserve exact table/column names
 - **develop** (`application-develop.yaml`): PostgreSQL (Supabase) for development environment
   - Credentials provided via environment variables: `SUPABASE_DB_URL_DEVELOP`, `SUPABASE_DB_USERNAME_DEVELOP`, `SUPABASE_DB_PASSWORD_DEVELOP`
   - Hibernate `ddl-auto: update` for automatic schema updates
