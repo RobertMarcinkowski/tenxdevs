@@ -129,14 +129,23 @@ To test protected endpoints, include JWT token in requests:
 curl -H "Authorization: Bearer <supabase-jwt-token>" http://localhost:8080/api/auth/me
 ```
 
+### Local Development without Authentication
+The **localh2** profile disables all authentication for convenience during local development:
+- No Supabase configuration required
+- No JWT tokens needed
+- All endpoints (including `/api/auth/me` and `/api/protected/**`) are publicly accessible
+- Useful for quick prototyping and testing without setting up authentication infrastructure
+
 ## Environment Configuration
 
 The application uses Spring profiles for environment-specific configuration:
 
-- **localh2** (`application-localh2.yaml`): H2 file-based database for local development
+- **localh2** (`application-localh2.yaml`): H2 file-based database for local development **WITHOUT authentication**
   - Database file path: `${H2_DB_PATH}` (e.g., `./data/testdb`)
   - H2 console enabled at `/h2-console` for debugging
   - Hibernate `ddl-auto: update` for automatic schema updates
+  - **No Supabase required** - all endpoints accessible without authentication
+  - Security components (JWT filter, Supabase services) are disabled for this profile
 - **localsupabase** (`application-localsupabase.yaml`): Local PostgreSQL connection for testing with Supabase
   - Connects to localhost:5432 with hardcoded credentials (for local testing only)
   - SQL logging enabled (`show-sql: true`)

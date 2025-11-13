@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tenxdevs</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script th:if="${!useMockAuth}" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script th:if="${useMockAuth}" src="/js/mock-auth.js"></script>
     <style>
         .env-ribbon {
             position: fixed;
@@ -119,6 +120,25 @@
             margin-top: 10px;
             color: #666;
         }
+        .mock-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .mock-info strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #856404;
+        }
+        .mock-info code {
+            background-color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body th:classappend="${environmentType != null ? 'with-ribbon' : ''}">
@@ -127,6 +147,14 @@
     </div>
     <div class="login-container">
         <h2>Login</h2>
+
+        <div th:if="${useMockAuth}" class="mock-info">
+            <strong>Mock Authentication Mode (Local Development)</strong>
+            Use these test credentials:<br>
+            <code>user@test.com</code> / <code>password</code><br>
+            <code>admin@test.com</code> / <code>admin</code><br>
+            <code>dev@test.com</code> / <code>dev</code>
+        </div>
 
         <div id="error-message" class="error"></div>
         <div id="success-message" class="success"></div>
@@ -153,16 +181,26 @@
     </div>
 
     <script th:inline="javascript">
-        // Get Supabase configuration from server
-        const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
-        const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
+        // Check if using mock authentication
+        const USE_MOCK_AUTH = /*[[${useMockAuth}]]*/ false;
 
-        // Initialize Supabase client
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize authentication client
+        let authClient;
+        if (USE_MOCK_AUTH) {
+            // Use mock authentication
+            authClient = window.mockSupabaseClient;
+        } else {
+            // Get Supabase configuration from server
+            const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
+            const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
+
+            // Initialize Supabase client
+            const { createClient } = supabase;
+            authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
         // Check if user is already logged in
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        authClient.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 // User is already logged in, redirect to app
                 window.location.href = '/app';
@@ -189,7 +227,7 @@
             loading.style.display = 'block';
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                const { data, error } = await authClient.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
@@ -198,19 +236,13 @@
                     throw error;
                 }
 
-                // Store the session token
-                const session = data.session;
-                if (session) {
-                    localStorage.setItem('supabase_token', session.access_token);
+                // Show success and redirect
+                successDiv.textContent = 'Login successful! Redirecting...';
+                successDiv.style.display = 'block';
 
-                    // Show success and redirect
-                    successDiv.textContent = 'Login successful! Redirecting...';
-                    successDiv.style.display = 'block';
-
-                    setTimeout(() => {
-                        window.location.href = '/app';
-                    }, 1000);
-                }
+                setTimeout(() => {
+                    window.location.href = '/app';
+                }, 1000);
             } catch (error) {
                 errorDiv.textContent = error.message || 'Login failed. Please try again.';
                 errorDiv.style.display = 'block';

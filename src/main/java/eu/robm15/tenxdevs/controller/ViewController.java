@@ -21,6 +21,7 @@ public class ViewController {
         // Determine environment type and ribbon display
         String environmentType = null;
         String ribbonColor = null;
+        boolean useMockAuth = activeProfile.equals("localh2");
 
         if (activeProfile.equals("localh2") || activeProfile.equals("localsupabase")) {
             environmentType = "LOCAL ENVIRONMENT";
@@ -34,6 +35,7 @@ public class ViewController {
         model.addAttribute("environmentType", environmentType);
         model.addAttribute("ribbonColor", ribbonColor);
         model.addAttribute("activeProfile", activeProfile);
+        model.addAttribute("useMockAuth", useMockAuth);
     }
 
     @GetMapping("/")

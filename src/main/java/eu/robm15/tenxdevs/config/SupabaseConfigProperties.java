@@ -1,9 +1,11 @@
 package eu.robm15.tenxdevs.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!localh2") // Not active for localh2 profile
 @ConfigurationProperties(prefix = "supabase")
 public class SupabaseConfigProperties {
 

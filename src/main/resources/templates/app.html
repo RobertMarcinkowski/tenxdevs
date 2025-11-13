@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App - Tenxdevs</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script th:if="${!useMockAuth}" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script th:if="${useMockAuth}" src="/js/mock-auth.js"></script>
     <style>
         .env-ribbon {
             position: fixed;
@@ -150,13 +151,19 @@
     </div>
 
     <script th:inline="javascript">
-        // Get Supabase configuration
-        const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
-        const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
+        // Check if using mock authentication
+        const USE_MOCK_AUTH = /*[[${useMockAuth}]]*/ false;
 
-        // Initialize Supabase client
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize authentication client
+        let authClient;
+        if (USE_MOCK_AUTH) {
+            authClient = window.mockSupabaseClient;
+        } else {
+            const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
+            const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
+            const { createClient } = supabase;
+            authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
         // Check authentication on page load
         async function checkAuth() {
@@ -165,7 +172,7 @@
             const appContent = document.getElementById('app-content');
 
             try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                const { data: { session }, error } = await authClient.auth.getSession();
 
                 if (error || !session) {
                     // Not authenticated, redirect to login
@@ -196,7 +203,7 @@
         // Logout handler
         async function handleLogout() {
             try {
-                const { error } = await supabaseClient.auth.signOut();
+                const { error } = await authClient.auth.signOut();
                 if (error) throw error;
 
                 // Clear local storage
@@ -217,7 +224,7 @@
             resultDiv.textContent = 'Loading...';
 
             try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
+                const { data: { session } } = await authClient.auth.getSession();
 
                 if (!session) {
                     throw new Error('No session found');

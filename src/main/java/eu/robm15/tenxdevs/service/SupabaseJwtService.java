@@ -4,6 +4,7 @@ import eu.robm15.tenxdevs.config.SupabaseConfigProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@Profile("!localh2") // Not active for localh2 profile
 public class SupabaseJwtService {
 
     private final SupabaseConfigProperties supabaseConfig;

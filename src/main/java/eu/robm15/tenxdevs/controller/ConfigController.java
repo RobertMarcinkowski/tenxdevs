@@ -1,6 +1,7 @@
 package eu.robm15.tenxdevs.controller;
 
 import eu.robm15.tenxdevs.config.SupabaseConfigProperties;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@Profile("!localh2") // Not active for localh2 profile - no Supabase config needed
 @RequestMapping("/api/config")
 public class ConfigController {
 

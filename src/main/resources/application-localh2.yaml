@@ -14,7 +14,5 @@ spring:
     console:
       enabled: true
 
-supabase:
-  url: ${SUPABASE_URL_LOCAL:http://localhost:54321}
-  anon-key: ${SUPABASE_ANON_KEY_LOCAL}
-  jwt-secret: ${SUPABASE_JWT_SECRET_LOCAL}
+# Note: localh2 profile runs WITHOUT authentication
+# No Supabase configuration needed - all endpoints are accessible without login
