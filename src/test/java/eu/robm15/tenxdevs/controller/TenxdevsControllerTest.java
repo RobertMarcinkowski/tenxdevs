@@ -44,14 +44,14 @@ public class TenxdevsControllerTest {
     void tenxdevsDefault() throws Exception {
         mockMvc.perform(get("/tenxdevs"))
             .andExpect(status().isOk())
-            .andExpect(content().string("Docker test 9. Hello World!"));
+            .andExpect(content().string("Docker test 10. Hello World!"));
     }
 
     @Test
     void tenxdevsWithProperty() throws Exception {
         mockMvc.perform(get("/tenxdevs").param("name", "Robert"))
             .andExpect(status().isOk())
-            .andExpect(content().string("Docker test 9. Hello Robert!"));
+            .andExpect(content().string("Docker test 10. Hello Robert!"));
     }
 
     @Test
