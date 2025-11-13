@@ -13,3 +13,6 @@ spring:
   h2:
     console:
       enabled: true
+
+# Note: localh2 profile runs WITHOUT authentication
+# No Supabase configuration needed - all endpoints are accessible without login
