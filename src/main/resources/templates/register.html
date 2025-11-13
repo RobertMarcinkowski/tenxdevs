@@ -6,6 +6,20 @@
     <title>Register - Tenxdevs</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        .env-ribbon {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--ribbon-color);
+            color: #000;
+            text-align: center;
+            padding: 8px 10px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -15,6 +29,9 @@
             margin: 0;
             background-color: #f5f5f5;
             padding: 20px;
+        }
+        body.with-ribbon {
+            padding-top: 50px;
         }
         .register-container {
             background-color: white;
@@ -109,7 +126,10 @@
         }
     </style>
 </head>
-<body>
+<body th:classappend="${environmentType != null ? 'with-ribbon' : ''}">
+    <div th:if="${environmentType != null}" class="env-ribbon" th:style="'--ribbon-color: ' + ${ribbonColor}">
+        <span th:text="${environmentType}">ENVIRONMENT</span>
+    </div>
     <div class="register-container">
         <h2>Create Account</h2>
 

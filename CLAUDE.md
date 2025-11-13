@@ -74,16 +74,60 @@ The project follows standard Spring Boot conventions with a layered architecture
 - **Controllers** (`controller/`): REST endpoints annotated with `@RestController`
   - Use Spring Web annotations (`@GetMapping`, `@RequestParam`, etc.)
   - Inject repositories via `@Autowired`
+  - `AuthController`: Authentication endpoints (`/api/auth/status`, `/api/auth/me`)
+  - `ViewController`: Thymeleaf template endpoints (landing, login, register, app)
 - **Models** (`model/`): JPA entities annotated with `@Entity`
   - Use Jakarta Persistence annotations (`@Id`, `@GeneratedValue`, `@Column`)
   - Example: `Experiment` entity with auto-generated ID
 - **Repositories** (`repository/`): Spring Data JPA repositories
   - Extend `JpaRepository<Entity, ID>` for CRUD operations
   - No custom query methods needed currently
+- **Services** (`service/`): Business logic layer
+  - `SupabaseJwtService`: JWT token validation and authentication
+- **Security** (`security/`): Authentication filters and configuration
+  - `JwtAuthenticationFilter`: Extracts and validates JWT tokens from Authorization header
+  - Uses stateless session management (no HTTP sessions)
+- **Config** (`config/`): Spring configuration classes
+  - `SecurityConfig`: Defines public vs protected endpoints, configures JWT filter chain
+  - `SupabaseConfigProperties`: Binds Supabase configuration from application properties
 - **Tests** (`src/test/java/eu/robm15/tenxdevs/`):
   - Controller tests use `@SpringBootTest` and `@AutoConfigureMockMvc`
   - MockMvc is used for testing REST endpoints
   - Test pattern: `mockMvc.perform(get(...)).andExpect(...)`
+
+## Authentication
+
+The application uses Supabase JWT-based authentication with Spring Security:
+
+### Architecture
+- **Stateless authentication**: No server-side sessions, JWT tokens carry all authentication state
+- **JWT validation**: Tokens are validated using Supabase JWT secret (HMAC-SHA256)
+- **Filter chain**: `JwtAuthenticationFilter` intercepts requests before controller layer
+- **Token format**: Expects `Authorization: Bearer <token>` header
+
+### Key Components
+- `JwtAuthenticationFilter` (`security/`): OncePerRequestFilter that extracts JWT from Authorization header, validates it, and sets Spring Security context
+- `SupabaseJwtService` (`service/`): Validates JWT tokens using Supabase JWT secret, extracts user claims (sub, email, role)
+- `SecurityConfig` (`config/`): Configures security filter chain with public/protected endpoints
+
+### Endpoint Security
+**Public endpoints (no authentication required):**
+- `/`, `/landing`, `/login`, `/register`, `/app` - Thymeleaf views
+- `/api/config/**` - Configuration endpoints
+- `/api/auth/status` - Auth API health check
+- `/api/status`, `/tenxdevs` - Public API endpoints
+- `/h2-console/**` - H2 database console (local profiles only)
+
+**Protected endpoints (JWT required):**
+- `/api/auth/me` - Get current user information
+- `/api/protected/**` - Protected API endpoints
+- All other endpoints default to authenticated
+
+### Testing Authentication
+To test protected endpoints, include JWT token in requests:
+```bash
+curl -H "Authorization: Bearer <supabase-jwt-token>" http://localhost:8080/api/auth/me
+```
 
 ## Environment Configuration
 
@@ -98,12 +142,14 @@ The application uses Spring profiles for environment-specific configuration:
   - SQL logging enabled (`show-sql: true`)
   - Uses `PhysicalNamingStrategyStandardImpl` to preserve exact table/column names
 - **develop** (`application-develop.yaml`): PostgreSQL (Supabase) for development environment
-  - Credentials provided via environment variables: `SUPABASE_DB_URL_DEVELOP`, `SUPABASE_DB_USERNAME_DEVELOP`, `SUPABASE_DB_PASSWORD_DEVELOP`
+  - Database credentials: `SUPABASE_DB_URL_DEVELOP`, `SUPABASE_DB_USERNAME_DEVELOP`, `SUPABASE_DB_PASSWORD_DEVELOP`
+  - Supabase authentication: `SUPABASE_URL_DEVELOP`, `SUPABASE_ANON_KEY_DEVELOP`, `SUPABASE_JWT_SECRET_DEVELOP`
   - Hibernate `ddl-auto: update` for automatic schema updates
   - SQL logging enabled (`show-sql: true`)
   - Uses `PhysicalNamingStrategyStandardImpl` to preserve exact table/column names
 - **prod** (`application-prod.yaml`): PostgreSQL (Supabase) for production
-  - Credentials provided via environment variables: `SUPABASE_DB_URL_PROD`, `SUPABASE_DB_USERNAME_PROD`, `SUPABASE_DB_PASSWORD_PROD`
+  - Database credentials: `SUPABASE_DB_URL_PROD`, `SUPABASE_DB_USERNAME_PROD`, `SUPABASE_DB_PASSWORD_PROD`
+  - Supabase authentication: `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `SUPABASE_JWT_SECRET_PROD`
 
 ## CI/CD Pipeline
 
@@ -181,18 +227,34 @@ Standard workflow for releases:
 ### Required GitHub Secrets
 
 The following secrets must be configured in GitHub repository settings:
+
+**VPS Deployment:**
 - `SSH_PRIVATE_KEY`: SSH key for VPS deployment
 - `VPS_HOST_NAME`: VPS hostname
 - `VPS_PORT_NUMBER`: SSH port for VPS
 - `VPS_PORT_NUMBER_DEV`: Application port for development environment
 - `VPS_PORT_NUMBER_PROD`: Application port for production environment
 - `VPS_USER_NAME`: SSH username for VPS
-- `SUPABASE_DB_URL_DEVELOP`: Supabase PostgreSQL connection URL for develop
-- `SUPABASE_DB_USERNAME_DEVELOP`: Supabase database username for develop
-- `SUPABASE_DB_PASSWORD_DEVELOP`: Supabase database password for develop
-- `SUPABASE_DB_URL_PROD`: Supabase PostgreSQL connection URL for production
-- `SUPABASE_DB_USERNAME_PROD`: Supabase database username for production
-- `SUPABASE_DB_PASSWORD_PROD`: Supabase database password for production
+
+**Supabase Database (Develop):**
+- `SUPABASE_DB_URL_DEVELOP`: PostgreSQL connection URL for develop
+- `SUPABASE_DB_USERNAME_DEVELOP`: Database username for develop
+- `SUPABASE_DB_PASSWORD_DEVELOP`: Database password for develop
+
+**Supabase Database (Production):**
+- `SUPABASE_DB_URL_PROD`: PostgreSQL connection URL for production
+- `SUPABASE_DB_USERNAME_PROD`: Database username for production
+- `SUPABASE_DB_PASSWORD_PROD`: Database password for production
+
+**Supabase Authentication (Develop):**
+- `SUPABASE_URL_DEVELOP`: Supabase project URL for develop
+- `SUPABASE_ANON_KEY_DEVELOP`: Supabase anonymous key for develop
+- `SUPABASE_JWT_SECRET_DEVELOP`: JWT secret for token validation in develop
+
+**Supabase Authentication (Production):**
+- `SUPABASE_URL_PROD`: Supabase project URL for production
+- `SUPABASE_ANON_KEY_PROD`: Supabase anonymous key for production
+- `SUPABASE_JWT_SECRET_PROD`: JWT secret for token validation in production
 
 ## Docker
 
@@ -214,6 +276,9 @@ docker run -d -p 8080:8080 \
   -e SUPABASE_DB_URL_DEVELOP="jdbc:postgresql://..." \
   -e SUPABASE_DB_USERNAME_DEVELOP="username" \
   -e SUPABASE_DB_PASSWORD_DEVELOP="password" \
+  -e SUPABASE_URL_DEVELOP="https://xxx.supabase.co" \
+  -e SUPABASE_ANON_KEY_DEVELOP="your-anon-key" \
+  -e SUPABASE_JWT_SECRET_DEVELOP="your-jwt-secret" \
   --name tenxdevs_DEV tenxdevs
 ```
 
