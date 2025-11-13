@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Tenxdevs</title>
+    <title>Register - Tenxdevs</title>
     <script th:if="${!useMockAuth}" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script th:if="${useMockAuth}" src="/js/mock-auth.js"></script>
     <style>
@@ -34,7 +34,7 @@
         body.with-ribbon {
             padding-top: 50px;
         }
-        .login-container {
+        .register-container {
             background-color: white;
             padding: 40px;
             border-radius: 8px;
@@ -67,7 +67,7 @@
         }
         button {
             width: 100%;
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             padding: 12px;
             border: none;
@@ -77,7 +77,7 @@
             margin-top: 10px;
         }
         button:hover:not(:disabled) {
-            background-color: #0056b3;
+            background-color: #218838;
         }
         button:disabled {
             opacity: 0.6;
@@ -120,24 +120,10 @@
             margin-top: 10px;
             color: #666;
         }
-        .mock-info {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .mock-info strong {
-            display: block;
-            margin-bottom: 8px;
-            color: #856404;
-        }
-        .mock-info code {
-            background-color: #fff;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
+        .password-strength {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #666;
         }
     </style>
 </head>
@@ -145,21 +131,13 @@
     <div th:if="${environmentType != null}" class="env-ribbon" th:style="'--ribbon-color: ' + ${ribbonColor}">
         <span th:text="${environmentType}">ENVIRONMENT</span>
     </div>
-    <div class="login-container">
-        <h2>Login</h2>
-
-        <div th:if="${useMockAuth}" class="mock-info">
-            <strong>Mock Authentication Mode (Local Development)</strong>
-            Use these test credentials:<br>
-            <code>user@test.com</code> / <code>password</code><br>
-            <code>admin@test.com</code> / <code>admin</code><br>
-            <code>dev@test.com</code> / <code>dev</code>
-        </div>
+    <div class="register-container">
+        <h2>Create Account</h2>
 
         <div id="error-message" class="error"></div>
         <div id="success-message" class="success"></div>
 
-        <form id="login-form">
+        <form id="register-form">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required autofocus>
@@ -167,15 +145,21 @@
 
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required minlength="6">
+                <div class="password-strength">Minimum 6 characters</div>
             </div>
 
-            <button type="submit" id="login-button">Sign in</button>
-            <div class="loading" id="loading">Signing in...</div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+
+            <button type="submit" id="register-button">Sign up</button>
+            <div class="loading" id="loading">Creating account...</div>
         </form>
 
         <div class="info">
-            <p>Don't have an account? <a href="/register">Sign up</a></p>
+            <p>Already have an account? <a href="/login">Sign in</a></p>
             <p><a href="/">Back to home</a></p>
         </div>
     </div>
@@ -187,14 +171,10 @@
         // Initialize authentication client
         let authClient;
         if (USE_MOCK_AUTH) {
-            // Use mock authentication
             authClient = window.mockSupabaseClient;
         } else {
-            // Get Supabase configuration from server
             const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
             const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
-
-            // Initialize Supabase client
             const { createClient } = supabase;
             authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
@@ -207,13 +187,14 @@
             }
         });
 
-        // Handle login form submission
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        // Handle register form submission
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const loginButton = document.getElementById('login-button');
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const registerButton = document.getElementById('register-button');
             const loading = document.getElementById('loading');
             const errorDiv = document.getElementById('error-message');
             const successDiv = document.getElementById('success-message');
@@ -222,12 +203,26 @@
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
 
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters long.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             // Disable button and show loading
-            loginButton.disabled = true;
+            registerButton.disabled = true;
             loading.style.display = 'block';
 
             try {
-                const { data, error } = await authClient.auth.signInWithPassword({
+                const { data, error } = await authClient.auth.signUp({
                     email: email,
                     password: password,
                 });
@@ -236,17 +231,27 @@
                     throw error;
                 }
 
-                // Show success and redirect
-                successDiv.textContent = 'Login successful! Redirecting...';
+                // Show success message
+                successDiv.textContent = 'Account created successfully! ';
+
+                // Check if email confirmation is required
+                if (data.user && !data.session) {
+                    successDiv.textContent += 'Please check your email to confirm your account.';
+                } else {
+                    successDiv.textContent += 'Redirecting to login...';
+                }
+
                 successDiv.style.display = 'block';
 
+                // Redirect to login after 3 seconds
                 setTimeout(() => {
-                    window.location.href = '/app';
-                }, 1000);
+                    window.location.href = '/login';
+                }, 3000);
+
             } catch (error) {
-                errorDiv.textContent = error.message || 'Login failed. Please try again.';
+                errorDiv.textContent = error.message || 'Registration failed. Please try again.';
                 errorDiv.style.display = 'block';
-                loginButton.disabled = false;
+                registerButton.disabled = false;
                 loading.style.display = 'none';
             }
         });

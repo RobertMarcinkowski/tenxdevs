@@ -13,3 +13,8 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+supabase:
+  url: ${SUPABASE_URL_DEVELOP}
+  anon-key: ${SUPABASE_ANON_KEY_DEVELOP}
+  jwt-secret: ${SUPABASE_JWT_SECRET_DEVELOP}
