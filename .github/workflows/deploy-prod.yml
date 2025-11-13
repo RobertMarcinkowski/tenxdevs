@@ -230,6 +230,9 @@ jobs:
           SUPABASE_DB_URL_PROD: ${{ secrets.SUPABASE_DB_URL_PROD }}
           SUPABASE_DB_USERNAME_PROD: ${{ secrets.SUPABASE_DB_USERNAME_PROD }}
           SUPABASE_DB_PASSWORD_PROD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+          SUPABASE_URL_PROD: ${{ secrets.SUPABASE_URL_PROD }}
+          SUPABASE_ANON_KEY_PROD: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+          SUPABASE_JWT_SECRET_PROD: ${{ secrets.SUPABASE_JWT_SECRET_PROD }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
@@ -252,6 +255,9 @@ jobs:
               -e SUPABASE_DB_URL_PROD="$SUPABASE_DB_URL_PROD" \
               -e SUPABASE_DB_USERNAME_PROD="$SUPABASE_DB_USERNAME_PROD" \
               -e SUPABASE_DB_PASSWORD_PROD="$SUPABASE_DB_PASSWORD_PROD" \
+              -e SUPABASE_URL_PROD="$SUPABASE_URL_PROD" \
+              -e SUPABASE_ANON_KEY_PROD="$SUPABASE_ANON_KEY_PROD" \
+              -e SUPABASE_JWT_SECRET_PROD="$SUPABASE_JWT_SECRET_PROD" \
               --name $DOCKER_RUN_NAME \
               $DOCKER_TAG
 
