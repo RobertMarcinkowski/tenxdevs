@@ -79,4 +79,10 @@ public class ViewController {
         addEnvironmentAttributes(model);
         return "reset-password";
     }
+
+    @GetMapping("/profile")
+    public String profile(Model model) {
+        addEnvironmentAttributes(model);
+        return "profile";
+    }
 }
