@@ -13,6 +13,13 @@ spring:
   h2:
     console:
       enabled: true
+  ai:
+    openai:
+      api-key: ${AI_API_KEY}
+      chat:
+        options:
+          model: ${AI_MODEL}
+          temperature: ${AI_TEMPERATURE}
 
 # Note: localh2 profile runs WITHOUT authentication
 # No Supabase configuration needed - all endpoints are accessible without login

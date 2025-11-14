@@ -228,6 +228,9 @@ jobs:
           SUPABASE_URL_DEVELOP: ${{ secrets.SUPABASE_URL_DEVELOP }}
           SUPABASE_ANON_KEY_DEVELOP: ${{ secrets.SUPABASE_ANON_KEY_DEVELOP }}
           SUPABASE_JWT_SECRET_DEVELOP: ${{ secrets.SUPABASE_JWT_SECRET_DEVELOP }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          AI_MODEL: ${{ vars.AI_MODEL }}
+          AI_TEMPERATURE: ${{ vars.AI_TEMPERATURE }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
@@ -253,6 +256,9 @@ jobs:
               -e SUPABASE_URL_DEVELOP="$SUPABASE_URL_DEVELOP" \
               -e SUPABASE_ANON_KEY_DEVELOP="$SUPABASE_ANON_KEY_DEVELOP" \
               -e SUPABASE_JWT_SECRET_DEVELOP="$SUPABASE_JWT_SECRET_DEVELOP" \
+              -e AI_API_KEY="$AI_API_KEY" \
+              -e AI_MODEL="$AI_MODEL" \
+              -e AI_TEMPERATURE="$AI_TEMPERATURE" \
               --name $DOCKER_RUN_NAME \
               $DOCKER_TAG
 

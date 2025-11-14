@@ -69,6 +69,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/status", "/tenxdevs").permitAll() // Public API endpoints
                     // Protected endpoints - JWT authentication required
                     .requestMatchers("/api/protected/**").authenticated()
+                    .requestMatchers("/tenxdevs-ask-ai").authenticated() // AI endpoint requires authentication
                     .anyRequest().authenticated() // All other requests require authentication
                 )
                 .headers(headers -> headers
