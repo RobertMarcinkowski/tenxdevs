@@ -16,7 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
     "supabase.url=http://localhost:54321",
-    "supabase.jwt-secret=test-secret-key-must-be-at-least-256-bits-long-for-hs256"
+    "supabase.jwt-secret=test-secret-key-must-be-at-least-256-bits-long-for-hs256",
+    "spring.ai.openai.api-key=test-api-key",
+    "spring.ai.openai.chat.options.model=gpt-4",
+    "spring.ai.openai.chat.options.temperature=0.7"
 })
 public class TenxdevsControllerTest {
 
@@ -94,6 +97,43 @@ public class TenxdevsControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.authenticated").value(true))
             .andExpect(jsonPath("$.principal").value("testuser@example.com"));
+    }
+
+    @Test
+    void aiEndpointRequiresAuthentication() throws Exception {
+        // Without token - should return 401 or 403
+        mockMvc.perform(get("/tenxdevs-ask-ai"))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void aiEndpointWithValidJwtReturnsUserInfo() throws Exception {
+        // Generate a valid test JWT token
+        String token = JwtTestUtil.generateTestToken(jwtSecret, "test-user-123", "testuser@example.com");
+
+        // With valid token - should return response including user info
+        // Note: This test may fail if AI API key is invalid or API is unreachable
+        // In a production test suite, we would mock the OpenAiChatModel
+        mockMvc.perform(get("/tenxdevs-ask-ai")
+                .param("prompt", "Test prompt")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("User: testuser@example.com")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("AI Model:")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Temperature:")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Prompt: Test prompt")));
+    }
+
+    @Test
+    void aiEndpointWithDefaultPrompt() throws Exception {
+        // Generate a valid test JWT token
+        String token = JwtTestUtil.generateTestToken(jwtSecret, "test-user-123", "testuser@example.com");
+
+        // Test default prompt behavior
+        mockMvc.perform(get("/tenxdevs-ask-ai")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Prompt: What is the capital of Poland?")));
     }
 
 }

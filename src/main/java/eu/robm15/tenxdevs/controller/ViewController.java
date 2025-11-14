@@ -67,4 +67,16 @@ public class ViewController {
         addEnvironmentAttributes(model);
         return "app";
     }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        addEnvironmentAttributes(model);
+        return "forgot-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPassword(Model model) {
+        addEnvironmentAttributes(model);
+        return "reset-password";
+    }
 }

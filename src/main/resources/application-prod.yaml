@@ -13,6 +13,13 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  ai:
+    openai:
+      api-key: ${AI_API_KEY}
+      chat:
+        options:
+          model: ${AI_MODEL}
+          temperature: ${AI_TEMPERATURE}
 
 supabase:
   url: ${SUPABASE_URL_PROD}
