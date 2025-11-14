@@ -61,8 +61,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                     // Public endpoints - no authentication required
                     .requestMatchers("/", "/landing", "/login", "/register", "/app", "/h2-console/**").permitAll()
+                    .requestMatchers("/forgot-password", "/reset-password").permitAll() // Password reset views
                     .requestMatchers("/api/config/**").permitAll() // Public config endpoints
                     .requestMatchers("/api/auth/status").permitAll() // Public auth status
+                    .requestMatchers("/api/auth/reset-password-request", "/api/auth/update-password").permitAll() // Password reset endpoints
                     .requestMatchers("/api/auth/me").authenticated() // Protected user info endpoint
                     .requestMatchers("/api/status", "/tenxdevs").permitAll() // Public API endpoints
                     // Protected endpoints - JWT authentication required
