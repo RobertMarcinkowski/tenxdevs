@@ -109,6 +109,7 @@ Poniższe funkcjonalności nie wchodzą w zakres wersji MVP VibeTravels:
 - Opis: Jako użytkownik, chcę wygenerować plan podróży na podstawie mojej notatki, aby otrzymać gotowe propozycje atrakcji i aktywności.
 - Kryteria akceptacji:
     - W widoku notatki znajduje się przycisk "Wygeneruj plan".
+    - Jeśli użytkownik nie ma uzupełnionych co najmniej trzech preferencji, to przycisk nie jest aktywny, oraz widoczna jest informacja o konieczności uzupełnienia preferencji użytkownika.
     - Po kliknięciu system wysyła zapytanie do AI, uwzględniając treść notatki i preferencje użytkownika.
     - Wygenerowany plan jest wyświetlany w formie listy aktywności na każdy dzień.
     - Jeśli użytkownik osiągnął limit użycia AI, wyświetlany jest odpowiedni komunikat, a plan nie jest generowany.
