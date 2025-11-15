@@ -675,17 +675,21 @@
         async function handleLogout() {
             try {
                 const { error } = await authClient.auth.signOut();
-                if (error) throw error;
-
-                // Clear local storage
-                localStorage.removeItem('supabase_token');
-
-                // Redirect to landing page
-                window.location.href = '/';
+                if (error) {
+                    console.warn('Logout warning:', error);
+                    // Don't throw - proceed with local cleanup anyway
+                }
             } catch (error) {
-                console.error('Logout failed:', error);
-                alert('Logout failed: ' + error.message);
+                console.warn('Logout error:', error);
+                // Don't alert - proceed with local cleanup anyway
             }
+
+            // Always clear local storage and redirect, regardless of signOut result
+            localStorage.removeItem('supabase_token');
+            localStorage.removeItem('mock_session'); // Also clear mock session if present
+
+            // Redirect to landing page
+            window.location.href = '/';
         }
 
         // Test protected API endpoint
