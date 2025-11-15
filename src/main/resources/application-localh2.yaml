@@ -21,5 +21,10 @@ spring:
           model: ${AI_MODEL}
           temperature: ${AI_TEMPERATURE}
 
+ai:
+  usage:
+    limit:
+      daily: 10
+
 # Note: localh2 profile runs WITHOUT authentication
 # No Supabase configuration needed - all endpoints are accessible without login
