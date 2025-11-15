@@ -62,17 +62,14 @@ public class SecurityConfig {
                     // Public endpoints - no authentication required
                     .requestMatchers("/", "/landing", "/login", "/register", "/app", "/profile", "/h2-console/**").permitAll()
                     .requestMatchers("/forgot-password", "/reset-password").permitAll() // Password reset views
-                    .requestMatchers("/api/config/**").permitAll() // Public config endpoints
                     .requestMatchers("/api/auth/status").permitAll() // Public auth status
                     .requestMatchers("/api/auth/reset-password-request", "/api/auth/update-password").permitAll() // Password reset endpoints
                     .requestMatchers("/api/auth/me").authenticated() // Protected user info endpoint
-                    .requestMatchers("/api/status", "/tenxdevs").permitAll() // Public API endpoints
                     // Protected endpoints - JWT authentication required
                     .requestMatchers("/api/preferences/**").authenticated() // Travel preferences endpoints
                     .requestMatchers("/api/notes/**").authenticated() // Notes endpoints
                     .requestMatchers("/api/trip-plans/**").authenticated() // Trip plan endpoints
                     .requestMatchers("/api/protected/**").authenticated()
-                    .requestMatchers("/tenxdevs-ask-ai").authenticated() // AI endpoint requires authentication
                     .anyRequest().authenticated() // All other requests require authentication
                 )
                 .headers(headers -> headers

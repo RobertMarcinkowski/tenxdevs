@@ -45,12 +45,12 @@ On Windows: `gradlew.bat build`
 
 ### Running a single test class
 ```bash
-./gradlew test --tests "eu.robm15.tenxdevs.controller.TenxdevsControllerTest"
+./gradlew test --tests "eu.robm15.tenxdevs.controller.NoteControllerTest"
 ```
 
 ### Running a single test method
 ```bash
-./gradlew test --tests "eu.robm15.tenxdevs.controller.TenxdevsControllerTest.tenxdevsDefault"
+./gradlew test --tests "eu.robm15.tenxdevs.controller.NoteControllerTest.testGetNotes"
 ```
 
 ### Running the application locally
@@ -93,9 +93,7 @@ The project follows standard Spring Boot conventions with a layered architecture
   - `NoteController`: Note CRUD operations (`/api/notes/*`) - requires JWT authentication
   - `PreferencesController`: Travel preferences management (`/api/preferences/*`) - requires JWT authentication
   - `TripPlanController`: Trip plan generation, retrieval, rating, and deletion (`/api/trip-plans/*`) - requires JWT authentication
-  - `ConfigController`: Configuration endpoints (`/api/config/*`) - public
   - `ViewController`: Thymeleaf templates (landing, login, register, app, profile, forgot-password, reset-password)
-  - `DiagnosticsController`: System diagnostics endpoints
   - `MockAuthController`: Mock authentication for localh2 profile
   - Controllers inject services via `@Autowired`, extract user ID from JWT tokens
 
@@ -156,10 +154,8 @@ The application uses Supabase JWT-based authentication with Spring Security:
 **Public endpoints (no authentication required):**
 - `/`, `/landing`, `/login`, `/register`, `/app`, `/profile` - Thymeleaf views
 - `/forgot-password`, `/reset-password` - Password reset views
-- `/api/config/**` - Configuration endpoints
 - `/api/auth/status` - Auth API health check
 - `/api/auth/reset-password-request`, `/api/auth/update-password` - Password reset endpoints
-- `/api/status`, `/tenxdevs` - Public API endpoints
 - `/h2-console/**` - H2 database console (local profiles only)
 
 **Protected endpoints (JWT required):**
@@ -168,7 +164,6 @@ The application uses Supabase JWT-based authentication with Spring Security:
 - `/api/preferences/**` - Travel preferences management
 - `/api/trip-plans/**` - Trip plan generation, retrieval, rating, deletion
 - `/api/protected/**` - Protected API endpoints
-- `/tenxdevs-ask-ai` - AI-powered trip planning endpoint
 - All other endpoints default to authenticated
 
 ### Testing Authentication
@@ -234,7 +229,6 @@ The AI integration follows Spring AI's OpenAiChatModel pattern:
 - **GET `/api/trip-plans/{id}`**: Get specific plan by ID
 - **PUT `/api/trip-plans/{id}/rate`**: Rate a plan (1-5 scale)
 - **DELETE `/api/trip-plans/{id}`**: Delete a plan
-- **POST `/tenxdevs-ask-ai`**: Legacy AI endpoint (if still in use)
 
 ## Environment Configuration
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Tenxdevs</title>
+    <title>Register - VibeTravels</title>
     <script th:if="${!useMockAuth}" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script th:if="${useMockAuth}" src="/js/mock-auth.js"></script>
     <style>
@@ -45,6 +45,12 @@
         h2 {
             text-align: center;
             color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
             margin-bottom: 30px;
         }
         .form-group {
@@ -132,7 +138,8 @@
         <span th:text="${environmentType}">ENVIRONMENT</span>
     </div>
     <div class="register-container">
-        <h2>Create Account</h2>
+        <h2>Join VibeTravels</h2>
+        <p class="subtitle">Start planning your perfect trip with AI assistance</p>
 
         <div id="error-message" class="error"></div>
         <div id="success-message" class="success"></div>

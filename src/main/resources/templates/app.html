@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App - Tenxdevs</title>
+    <title>VibeTravels - Your AI Travel Planner</title>
     <script th:if="${!useMockAuth}" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script th:if="${useMockAuth}" src="/js/mock-auth.js"></script>
     <style>
@@ -40,15 +40,14 @@
         }
         h1 {
             color: #333;
+            margin-bottom: 10px;
+            text-align: center;
         }
-        .user-info {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-        }
-        .user-info p {
-            margin: 8px 0;
+        .welcome-message {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-align: center;
         }
         .logout-button {
             background-color: #dc3545;
@@ -91,41 +90,6 @@
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
-        }
-        .api-section {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-        .api-section h2 {
-            margin-top: 0;
-            color: #333;
-            font-size: 18px;
-        }
-        .api-result {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        button.test-api {
-            background-color: #007bff;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button.test-api:hover {
-            background-color: #0056b3;
         }
         /* Notes Section Styles */
         .notes-section {
@@ -514,27 +478,12 @@
         <span th:text="${environmentType}">ENVIRONMENT</span>
     </div>
     <div id="app-content" class="container" style="display: none;">
-        <h1>Welcome to Tenxdevs App!</h1>
-
-        <div class="user-info">
-            <p><strong>User Information:</strong></p>
-            <p>Email: <strong id="user-email">Loading...</strong></p>
-            <p>User ID: <span id="user-id">Loading...</span></p>
-            <p>Role: <span id="user-role">Loading...</span></p>
-        </div>
-
-        <p>This is a protected area. You successfully logged in with Supabase!</p>
+        <h1>VibeTravels</h1>
+        <p class="welcome-message">Welcome back, <span id="user-email">...</span>!</p>
 
         <div class="button-group">
             <button class="profile-button" onclick="window.location.href='/profile'">Edit Travel Preferences</button>
             <button class="logout-button" onclick="handleLogout()">Logout</button>
-        </div>
-
-        <div class="api-section">
-            <h2>Test Protected API</h2>
-            <p>Click the button below to test a protected API endpoint with your JWT token:</p>
-            <button class="test-api" onclick="testProtectedApi()">Test /api/auth/me</button>
-            <div id="api-result" class="api-result" style="display: none;"></div>
         </div>
 
         <div class="notes-section">
@@ -657,9 +606,7 @@
 
                 // Authenticated, show user info
                 const user = session.user;
-                document.getElementById('user-email').textContent = user.email || 'N/A';
-                document.getElementById('user-id').textContent = user.id || 'N/A';
-                document.getElementById('user-role').textContent = user.role || 'user';
+                document.getElementById('user-email').textContent = user.email || 'Guest';
 
                 loadingDiv.style.display = 'none';
                 appContent.style.display = 'block';
@@ -690,35 +637,6 @@
 
             // Redirect to landing page
             window.location.href = '/';
-        }
-
-        // Test protected API endpoint
-        async function testProtectedApi() {
-            const resultDiv = document.getElementById('api-result');
-            resultDiv.style.display = 'block';
-            resultDiv.textContent = 'Loading...';
-
-            try {
-                const { data: { session } } = await authClient.auth.getSession();
-
-                if (!session) {
-                    throw new Error('No session found');
-                }
-
-                const response = await fetch('/api/auth/me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-                resultDiv.textContent = JSON.stringify(data, null, 2);
-
-            } catch (error) {
-                resultDiv.textContent = 'Error: ' + error.message;
-            }
         }
 
         // Notes Management Functions
