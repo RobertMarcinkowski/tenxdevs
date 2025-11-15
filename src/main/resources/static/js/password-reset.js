@@ -74,11 +74,11 @@ async function handleResetPassword(event) {
         return;
     }
 
-    // Get token from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    // Get access token from URL hash fragment (Supabase sends it after #)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
 
-    if (!token) {
+    if (!accessToken) {
         errorDiv.textContent = 'Invalid or missing reset token';
         errorDiv.style.display = 'block';
         return;
@@ -95,7 +95,7 @@ async function handleResetPassword(event) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                token: token,
+                accessToken: accessToken,
                 newPassword: newPassword
             })
         });
