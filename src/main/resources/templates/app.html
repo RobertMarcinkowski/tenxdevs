@@ -379,6 +379,134 @@
         .note-detail-actions .delete-btn:hover {
             background-color: #c82333;
         }
+        /* Trip Plan Styles */
+        .trip-plan-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+        .trip-plan-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .generate-plan-button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .generate-plan-button:hover:not(:disabled) {
+            background-color: #218838;
+        }
+        .generate-plan-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .plan-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: #856404;
+        }
+        .plan-warning a {
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .plan-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: #0c5460;
+            font-size: 13px;
+        }
+        .trip-plan-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .trip-plan-item .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .trip-plan-item .plan-date {
+            font-size: 12px;
+            color: #666;
+        }
+        .trip-plan-item .plan-content {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .trip-plan-item .plan-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+        .trip-plan-item .plan-rating label {
+            font-size: 14px;
+            color: #333;
+            margin: 0;
+        }
+        .star-rating {
+            display: inline-flex;
+            gap: 5px;
+        }
+        .star-rating .star {
+            font-size: 20px;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        .star-rating .star.filled {
+            color: #ffc107;
+        }
+        .star-rating .star:hover,
+        .star-rating .star.hover {
+            color: #ffc107;
+        }
+        .generating-plan {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .generating-plan .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #28a745;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body th:classappend="${environmentType != null ? 'with-ribbon' : ''}">
@@ -461,6 +589,30 @@
                 Created: <span id="note-detail-created"></span> |
                 Last updated: <span id="note-detail-updated"></span>
             </div>
+
+            <!-- Trip Plan Section -->
+            <div class="trip-plan-section">
+                <h3>Trip Plans</h3>
+
+                <!-- Validation Messages -->
+                <div id="plan-warning" class="plan-warning" style="display: none;"></div>
+                <div id="plan-info" class="plan-info" style="display: none;"></div>
+
+                <!-- Generate Plan Button -->
+                <button id="generate-plan-btn" class="generate-plan-button" onclick="generateTripPlan()" disabled>
+                    Generate Trip Plan
+                </button>
+
+                <!-- Generating Status -->
+                <div id="generating-status" class="generating-plan" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Generating your personalized trip plan...</p>
+                </div>
+
+                <!-- Trip Plans List -->
+                <div id="trip-plans-list"></div>
+            </div>
+
             <div class="note-detail-actions">
                 <button type="button" class="close-btn" onclick="closeNoteDetail()">Close</button>
                 <button type="button" class="edit-btn" onclick="editNoteFromDetail()">Edit</button>
@@ -816,6 +968,271 @@
                 await deleteNote(noteId);
             }
         }
+
+        // Trip Plan Management Functions
+
+        let currentTripPlans = [];
+
+        // Check if user can generate a plan and update UI accordingly
+        async function checkCanGeneratePlan(noteId) {
+            const warningDiv = document.getElementById('plan-warning');
+            const infoDiv = document.getElementById('plan-info');
+            const generateBtn = document.getElementById('generate-plan-btn');
+
+            // Hide messages initially
+            warningDiv.style.display = 'none';
+            infoDiv.style.display = 'none';
+            generateBtn.disabled = true;
+
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    warningDiv.innerHTML = 'Please log in to generate trip plans.';
+                    warningDiv.style.display = 'block';
+                    return;
+                }
+
+                const response = await fetch(`/api/trip-plans/can-generate?noteId=${noteId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to check generation status');
+                }
+
+                const result = await response.json();
+
+                if (result.can_generate) {
+                    // User can generate plan
+                    generateBtn.disabled = false;
+                    infoDiv.innerHTML = `You can generate ${result.remaining_usage} more plan(s) today (limit: ${result.daily_limit} per day).`;
+                    infoDiv.style.display = 'block';
+                } else if (result.missing_preferences) {
+                    // Missing preferences
+                    warningDiv.innerHTML = `${result.reason}. <a href="/profile">Go to Profile</a> to set your travel preferences.`;
+                    warningDiv.style.display = 'block';
+                } else if (result.limit_exceeded) {
+                    // Limit exceeded
+                    warningDiv.innerHTML = `${result.reason}. Please try again tomorrow.`;
+                    warningDiv.style.display = 'block';
+                } else {
+                    // Other reason
+                    warningDiv.innerHTML = result.reason || 'Cannot generate plan at this time.';
+                    warningDiv.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error checking generation status:', error);
+                warningDiv.innerHTML = 'Failed to check if you can generate a plan. Please try again.';
+                warningDiv.style.display = 'block';
+            }
+        }
+
+        // Generate a trip plan
+        async function generateTripPlan() {
+            if (!currentDetailNoteId) {
+                alert('No note selected');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generate-plan-btn');
+            const generatingStatus = document.getElementById('generating-status');
+            const warningDiv = document.getElementById('plan-warning');
+
+            // Show generating status
+            generateBtn.disabled = true;
+            generatingStatus.style.display = 'block';
+            warningDiv.style.display = 'none';
+
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    alert('Please log in to generate trip plans.');
+                    return;
+                }
+
+                const response = await fetch('/api/trip-plans/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ noteId: currentDetailNoteId })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Failed to generate trip plan');
+                }
+
+                // Plan generated successfully
+                alert('Trip plan generated successfully!');
+
+                // Reload plans and update generation status
+                await loadTripPlans(currentDetailNoteId);
+                await checkCanGeneratePlan(currentDetailNoteId);
+
+            } catch (error) {
+                console.error('Error generating trip plan:', error);
+                warningDiv.innerHTML = 'Failed to generate trip plan: ' + error.message;
+                warningDiv.style.display = 'block';
+            } finally {
+                generatingStatus.style.display = 'none';
+            }
+        }
+
+        // Load trip plans for a note
+        async function loadTripPlans(noteId) {
+            const plansListDiv = document.getElementById('trip-plans-list');
+
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    plansListDiv.innerHTML = '<div class="error">Please log in to view trip plans.</div>';
+                    return;
+                }
+
+                const response = await fetch(`/api/trip-plans?noteId=${noteId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load trip plans');
+                }
+
+                currentTripPlans = await response.json();
+                renderTripPlans();
+
+            } catch (error) {
+                console.error('Error loading trip plans:', error);
+                plansListDiv.innerHTML = '<div class="error">Failed to load trip plans.</div>';
+            }
+        }
+
+        // Render trip plans
+        function renderTripPlans() {
+            const plansListDiv = document.getElementById('trip-plans-list');
+
+            if (currentTripPlans.length === 0) {
+                plansListDiv.innerHTML = '<p style="color: #666; font-size: 14px;">No trip plans generated yet. Click "Generate Trip Plan" to create one!</p>';
+                return;
+            }
+
+            let html = '';
+            for (const plan of currentTripPlans) {
+                const createdDate = new Date(plan.createdAt).toLocaleString();
+                const rating = plan.rating || 0;
+
+                html += `
+                    <div class="trip-plan-item">
+                        <div class="plan-header">
+                            <span class="plan-date">Generated: ${createdDate}</span>
+                        </div>
+                        <div class="plan-content">${escapeHtml(plan.planContent)}</div>
+                        <div class="plan-rating">
+                            <label>Rate this plan:</label>
+                            <div class="star-rating" id="rating-${plan.id}">
+                                ${renderStars(plan.id, rating)}
+                            </div>
+                            ${rating > 0 ? `<span style="color: #666; font-size: 13px;">(${rating}/5)</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            plansListDiv.innerHTML = html;
+        }
+
+        // Render star rating
+        function renderStars(planId, currentRating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                const filled = i <= currentRating ? 'filled' : '';
+                html += `<span class="star ${filled}" onclick="rateTripPlan(${planId}, ${i})" onmouseover="hoverStar(${planId}, ${i})" onmouseout="unhoverStar(${planId})">★</span>`;
+            }
+            return html;
+        }
+
+        // Hover effect for stars
+        function hoverStar(planId, rating) {
+            const stars = document.querySelectorAll(`#rating-${planId} .star`);
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('hover');
+                } else {
+                    star.classList.remove('hover');
+                }
+            });
+        }
+
+        // Unhover effect for stars
+        function unhoverStar(planId) {
+            const stars = document.querySelectorAll(`#rating-${planId} .star`);
+            stars.forEach(star => {
+                star.classList.remove('hover');
+            });
+        }
+
+        // Rate a trip plan
+        async function rateTripPlan(planId, rating) {
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    alert('Please log in to rate trip plans.');
+                    return;
+                }
+
+                const response = await fetch(`/api/trip-plans/${planId}/rate`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ rating: rating })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Failed to rate trip plan');
+                }
+
+                // Update the plan rating in memory and re-render
+                const plan = currentTripPlans.find(p => p.id === planId);
+                if (plan) {
+                    plan.rating = rating;
+                }
+                renderTripPlans();
+
+            } catch (error) {
+                console.error('Error rating trip plan:', error);
+                alert('Failed to rate trip plan: ' + error.message);
+            }
+        }
+
+        // Enhanced openNoteDetail to load trip plans
+        const originalOpenNoteDetail = openNoteDetail;
+        openNoteDetail = async function(noteId) {
+            // Call original function
+            originalOpenNoteDetail(noteId);
+
+            // Load trip plans and check generation status
+            await loadTripPlans(noteId);
+            await checkCanGeneratePlan(noteId);
+        };
 
         // Run authentication check on page load
         checkAuth().then(() => {

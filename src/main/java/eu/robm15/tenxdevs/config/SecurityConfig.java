@@ -70,6 +70,7 @@ public class SecurityConfig {
                     // Protected endpoints - JWT authentication required
                     .requestMatchers("/api/preferences/**").authenticated() // Travel preferences endpoints
                     .requestMatchers("/api/notes/**").authenticated() // Notes endpoints
+                    .requestMatchers("/api/trip-plans/**").authenticated() // Trip plan endpoints
                     .requestMatchers("/api/protected/**").authenticated()
                     .requestMatchers("/tenxdevs-ask-ai").authenticated() // AI endpoint requires authentication
                     .anyRequest().authenticated() // All other requests require authentication
