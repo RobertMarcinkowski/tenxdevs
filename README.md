@@ -158,12 +158,12 @@ Run all tests:
 
 Run a specific test class:
 ```bash
-./gradlew test --tests "eu.robm15.tenxdevs.controller.TenxdevsControllerTest"
+./gradlew test --tests "eu.robm15.tenxdevs.controller.NoteControllerTest"
 ```
 
 Run a specific test method:
 ```bash
-./gradlew test --tests "eu.robm15.tenxdevs.controller.TenxdevsControllerTest.tenxdevsDefault"
+./gradlew test --tests "eu.robm15.tenxdevs.controller.NoteControllerTest.testGetNotes"
 ```
 
 ### Run the Application
