@@ -127,6 +127,258 @@
         button.test-api:hover {
             background-color: #0056b3;
         }
+        /* Notes Section Styles */
+        .notes-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .notes-section h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .add-note-button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .add-note-button:hover {
+            background-color: #218838;
+        }
+        .notes-list {
+            margin-top: 20px;
+        }
+        .note-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .note-item h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .note-item .note-content {
+            color: #666;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+        .note-item .note-meta {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .note-item .note-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .note-item button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .note-item .edit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .note-item .edit-btn:hover {
+            background-color: #0056b3;
+        }
+        .note-item .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .note-item .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .note-form-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .note-form-modal.active {
+            display: flex;
+        }
+        .note-form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .note-form-container h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .note-form-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        .note-form-container input[type="text"],
+        .note-form-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .note-form-container textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+        .note-form-container .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .note-form-container .save-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .note-form-container .save-btn:hover {
+            background-color: #218838;
+        }
+        .note-form-container .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .note-form-container .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+        .empty-notes {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        /* Note item clickable styling */
+        .note-item {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .note-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        /* Detailed note view modal */
+        .note-detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .note-detail-modal.active {
+            display: flex;
+        }
+        .note-detail-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .note-detail-container h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .note-detail-content {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .note-detail-meta {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .note-detail-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        .note-detail-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .note-detail-actions .close-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        .note-detail-actions .close-btn:hover {
+            background-color: #5a6268;
+        }
+        .note-detail-actions .edit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .note-detail-actions .edit-btn:hover {
+            background-color: #0056b3;
+        }
+        .note-detail-actions .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .note-detail-actions .delete-btn:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body th:classappend="${environmentType != null ? 'with-ribbon' : ''}">
@@ -156,6 +408,15 @@
             <button class="test-api" onclick="testProtectedApi()">Test /api/auth/me</button>
             <div id="api-result" class="api-result" style="display: none;"></div>
         </div>
+
+        <div class="notes-section">
+            <h2>Travel Notes</h2>
+            <p>Create and manage your travel ideas and notes.</p>
+            <button class="add-note-button" onclick="openNoteForm()">Add Note</button>
+            <div id="notes-list" class="notes-list">
+                <div class="loading">Loading notes...</div>
+            </div>
+        </div>
     </div>
 
     <div id="loading" class="container loading">
@@ -167,6 +428,44 @@
             <strong>Authentication Required</strong>
             <p>You need to log in to access this page.</p>
             <p><a href="/login">Go to Login</a></p>
+        </div>
+    </div>
+
+    <!-- Note Form Modal -->
+    <div id="note-form-modal" class="note-form-modal">
+        <div class="note-form-container">
+            <h2 id="note-form-title">Add New Note</h2>
+            <form id="note-form" onsubmit="saveNote(event)">
+                <input type="hidden" id="note-id" value="">
+
+                <label for="note-title-input">Title:</label>
+                <input type="text" id="note-title-input" name="title" required maxlength="255" placeholder="Enter note title...">
+
+                <label for="note-content-input">Content:</label>
+                <textarea id="note-content-input" name="content" required placeholder="Enter your travel ideas and notes..."></textarea>
+
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" onclick="closeNoteForm()">Cancel</button>
+                    <button type="submit" class="save-btn">Save Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Detailed Note View Modal -->
+    <div id="note-detail-modal" class="note-detail-modal">
+        <div class="note-detail-container">
+            <h2 id="note-detail-title">Note Title</h2>
+            <div id="note-detail-content" class="note-detail-content">Note content...</div>
+            <div id="note-detail-meta" class="note-detail-meta">
+                Created: <span id="note-detail-created"></span> |
+                Last updated: <span id="note-detail-updated"></span>
+            </div>
+            <div class="note-detail-actions">
+                <button type="button" class="close-btn" onclick="closeNoteDetail()">Close</button>
+                <button type="button" class="edit-btn" onclick="editNoteFromDetail()">Edit</button>
+                <button type="button" class="delete-btn" onclick="deleteNoteFromDetail()">Delete</button>
+            </div>
         </div>
     </div>
 
@@ -266,8 +565,263 @@
             }
         }
 
+        // Notes Management Functions
+        let currentNotes = [];
+        let currentDetailNoteId = null; // Track the currently viewed note in detail modal
+
+        // Load all notes from the API
+        async function loadNotes() {
+            const notesListDiv = document.getElementById('notes-list');
+
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    notesListDiv.innerHTML = '<div class="error">No session found. Please log in again.</div>';
+                    return;
+                }
+
+                const response = await fetch('/api/notes', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load notes');
+                }
+
+                currentNotes = await response.json();
+                renderNotes();
+
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                notesListDiv.innerHTML = '<div class="error">Failed to load notes: ' + error.message + '</div>';
+            }
+        }
+
+        // Render the notes list
+        function renderNotes() {
+            const notesListDiv = document.getElementById('notes-list');
+
+            if (currentNotes.length === 0) {
+                notesListDiv.innerHTML = '<div class="empty-notes">No notes yet. Click "Add Note" to create your first travel note!</div>';
+                return;
+            }
+
+            let html = '';
+            for (const note of currentNotes) {
+                const createdDate = new Date(note.createdAt).toLocaleDateString();
+                const updatedDate = new Date(note.updatedAt).toLocaleDateString();
+
+                // Truncate content for preview (max 150 characters)
+                const contentPreview = note.content.length > 150
+                    ? note.content.substring(0, 150) + '...'
+                    : note.content;
+
+                html += `
+                    <div class="note-item" onclick="openNoteDetail(${note.id})">
+                        <h3>${escapeHtml(note.title)}</h3>
+                        <div class="note-content">${escapeHtml(contentPreview)}</div>
+                        <div class="note-meta">
+                            Created: ${createdDate} | Last updated: ${updatedDate}
+                        </div>
+                        <div class="note-actions" onclick="event.stopPropagation()">
+                            <button class="edit-btn" onclick="editNote(${note.id})">Edit</button>
+                            <button class="delete-btn" onclick="deleteNote(${note.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            notesListDiv.innerHTML = html;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Open the note form modal (for creating or editing)
+        function openNoteForm(noteId = null) {
+            const modal = document.getElementById('note-form-modal');
+            const formTitle = document.getElementById('note-form-title');
+            const noteIdInput = document.getElementById('note-id');
+            const titleInput = document.getElementById('note-title-input');
+            const contentInput = document.getElementById('note-content-input');
+
+            if (noteId) {
+                // Editing existing note
+                const note = currentNotes.find(n => n.id === noteId);
+                if (note) {
+                    formTitle.textContent = 'Edit Note';
+                    noteIdInput.value = note.id;
+                    titleInput.value = note.title;
+                    contentInput.value = note.content;
+                }
+            } else {
+                // Creating new note
+                formTitle.textContent = 'Add New Note';
+                noteIdInput.value = '';
+                titleInput.value = '';
+                contentInput.value = '';
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Close the note form modal
+        function closeNoteForm() {
+            const modal = document.getElementById('note-form-modal');
+            modal.classList.remove('active');
+        }
+
+        // Save note (create or update)
+        async function saveNote(event) {
+            event.preventDefault();
+
+            const noteId = document.getElementById('note-id').value;
+            const title = document.getElementById('note-title-input').value.trim();
+            const content = document.getElementById('note-content-input').value.trim();
+
+            if (!title || !content) {
+                alert('Please fill in both title and content');
+                return;
+            }
+
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    alert('No session found. Please log in again.');
+                    return;
+                }
+
+                const url = noteId ? `/api/notes/${noteId}` : '/api/notes';
+                const method = noteId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Failed to save note');
+                }
+
+                closeNoteForm();
+                loadNotes(); // Reload notes list
+                alert(result.message || 'Note saved successfully!');
+
+            } catch (error) {
+                console.error('Error saving note:', error);
+                alert('Failed to save note: ' + error.message);
+            }
+        }
+
+        // Edit a note
+        function editNote(noteId) {
+            openNoteForm(noteId);
+        }
+
+        // Delete a note
+        async function deleteNote(noteId) {
+            if (!confirm('Are you sure you want to delete this note?')) {
+                return;
+            }
+
+            try {
+                const { data: { session } } = await authClient.auth.getSession();
+
+                if (!session) {
+                    alert('No session found. Please log in again.');
+                    return;
+                }
+
+                const response = await fetch(`/api/notes/${noteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Failed to delete note');
+                }
+
+                loadNotes(); // Reload notes list
+                alert(result.message || 'Note deleted successfully!');
+
+            } catch (error) {
+                console.error('Error deleting note:', error);
+                alert('Failed to delete note: ' + error.message);
+            }
+        }
+
+        // Detailed Note View Functions
+
+        // Open detailed view of a note
+        function openNoteDetail(noteId) {
+            const note = currentNotes.find(n => n.id === noteId);
+            if (!note) {
+                console.error('Note not found:', noteId);
+                return;
+            }
+
+            currentDetailNoteId = noteId;
+
+            const modal = document.getElementById('note-detail-modal');
+            document.getElementById('note-detail-title').textContent = note.title;
+            document.getElementById('note-detail-content').textContent = note.content;
+            document.getElementById('note-detail-created').textContent = new Date(note.createdAt).toLocaleString();
+            document.getElementById('note-detail-updated').textContent = new Date(note.updatedAt).toLocaleString();
+
+            modal.classList.add('active');
+        }
+
+        // Close detailed view modal
+        function closeNoteDetail() {
+            const modal = document.getElementById('note-detail-modal');
+            modal.classList.remove('active');
+            currentDetailNoteId = null;
+        }
+
+        // Edit note from detailed view
+        function editNoteFromDetail() {
+            if (currentDetailNoteId) {
+                const noteId = currentDetailNoteId; // Save the ID before closing
+                closeNoteDetail();
+                editNote(noteId); // Use the saved ID
+            }
+        }
+
+        // Delete note from detailed view
+        async function deleteNoteFromDetail() {
+            if (currentDetailNoteId) {
+                const noteId = currentDetailNoteId;
+                closeNoteDetail();
+                await deleteNote(noteId);
+            }
+        }
+
         // Run authentication check on page load
-        checkAuth();
+        checkAuth().then(() => {
+            // Load notes after successful authentication
+            loadNotes();
+        });
     </script>
 </body>
 </html>
