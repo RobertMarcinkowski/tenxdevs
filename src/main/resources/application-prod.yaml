@@ -25,3 +25,8 @@ supabase:
   url: ${SUPABASE_URL_PROD}
   anon-key: ${SUPABASE_ANON_KEY_PROD}
   jwt-secret: ${SUPABASE_JWT_SECRET_PROD}
+
+ai:
+  usage:
+    limit:
+      daily: 10
