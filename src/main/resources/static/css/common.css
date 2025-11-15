@@ -1,0 +1,73 @@
+/* Common styles shared across all pages */
+
+/* Environment ribbon */
+.env-ribbon {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--ribbon-color);
+    color: #000;
+    text-align: center;
+    padding: 8px 10px;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 9999;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Body styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+body.with-ribbon {
+    padding-top: 50px;
+}
+
+/* Common container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Common headings */
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+/* Common messages */
+.error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.success {
+    color: #28a745;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    margin-top: 10px;
+    color: #666;
+}

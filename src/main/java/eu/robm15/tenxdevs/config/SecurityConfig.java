@@ -59,6 +59,8 @@ public class SecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No sessions
                 )
                 .authorizeHttpRequests(authorize -> authorize
+                    // Static resources - publicly accessible
+                    .requestMatchers("/css/**", "/js/**", "/favicon.ico").permitAll()
                     // Public endpoints - no authentication required
                     .requestMatchers("/", "/landing", "/login", "/register", "/app", "/profile", "/h2-console/**").permitAll()
                     .requestMatchers("/forgot-password", "/reset-password").permitAll() // Password reset views
