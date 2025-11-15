@@ -3,150 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Tenxdevs</title>
+    <title>Login - VibeTravels</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/auth.css">
     <script th:if="${!useMockAuth}" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script th:if="${useMockAuth}" src="/js/mock-auth.js"></script>
-    <style>
-        .env-ribbon {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--ribbon-color);
-            color: #000;
-            text-align: center;
-            padding: 8px 10px;
-            font-weight: bold;
-            font-size: 14px;
-            z-index: 9999;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-        body.with-ribbon {
-            padding-top: 50px;
-        }
-        .login-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        button {
-            width: 100%;
-            background-color: #007bff;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .error {
-            color: #dc3545;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .success {
-            color: #28a745;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .info {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-        .info a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .info a:hover {
-            text-decoration: underline;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 10px;
-            color: #666;
-        }
-        .mock-info {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .mock-info strong {
-            display: block;
-            margin-bottom: 8px;
-            color: #856404;
-        }
-        .mock-info code {
-            background-color: #fff;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-    </style>
 </head>
 <body th:classappend="${environmentType != null ? 'with-ribbon' : ''}">
     <div th:if="${environmentType != null}" class="env-ribbon" th:style="'--ribbon-color: ' + ${ribbonColor}">
         <span th:text="${environmentType}">ENVIRONMENT</span>
     </div>
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>VibeTravels</h2>
+        <p class="subtitle">AI-powered travel planning for your next adventure</p>
 
         <div th:if="${useMockAuth}" class="mock-info">
             <strong>Mock Authentication Mode (Local Development)</strong>
@@ -182,36 +51,29 @@
     </div>
 
     <script th:inline="javascript">
-        // Check if using mock authentication
+        // Initialize authentication client with Thymeleaf variables
         const USE_MOCK_AUTH = /*[[${useMockAuth}]]*/ false;
-
-        // Initialize authentication client
         let authClient;
+
         try {
             if (USE_MOCK_AUTH) {
-                // Use mock authentication
                 console.log('[AUTH] Using mock authentication');
                 authClient = window.mockSupabaseClient;
             } else {
-                // Get Supabase configuration from server
                 const SUPABASE_URL = /*[[${supabaseUrl}]]*/ 'http://localhost:54321';
                 const SUPABASE_ANON_KEY = /*[[${supabaseAnonKey}]]*/ '';
 
                 console.log('[AUTH] Supabase URL:', SUPABASE_URL);
                 console.log('[AUTH] Anon key present:', SUPABASE_ANON_KEY ? 'yes' : 'no');
-                console.log('[AUTH] Anon key length:', SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.length : 0);
 
-                // Validate configuration
                 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
                     throw new Error('Supabase configuration is missing. Please check environment variables.');
                 }
 
-                // Check if Supabase library is loaded
                 if (typeof supabase === 'undefined') {
                     throw new Error('Supabase library failed to load. Please check your internet connection.');
                 }
 
-                // Initialize Supabase client
                 const { createClient } = supabase;
                 authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 console.log('[AUTH] Supabase client initialized successfully');
@@ -222,75 +84,9 @@
             document.getElementById('error-message').style.display = 'block';
         }
 
-        // Check if user is already logged in
-        if (authClient) {
-            authClient.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    // User is already logged in, redirect to app
-                    console.log('[AUTH] User already logged in, redirecting to app');
-                    window.location.href = '/app';
-                }
-            }).catch(error => {
-                console.error('[AUTH] Session check error:', error);
-            });
-        }
-
         // Handle login form submission
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginButton = document.getElementById('login-button');
-            const loading = document.getElementById('loading');
-            const errorDiv = document.getElementById('error-message');
-            const successDiv = document.getElementById('success-message');
-
-            // Hide previous messages
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
-
-            // Check if authClient is initialized
-            if (!authClient) {
-                errorDiv.textContent = 'Authentication system is not initialized. Please refresh the page and check the console for errors.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Disable button and show loading
-            loginButton.disabled = true;
-            loading.style.display = 'block';
-
-            console.log('[AUTH] Attempting login for:', email);
-
-            try {
-                const { data, error } = await authClient.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
-
-                if (error) {
-                    console.error('[AUTH] Login error:', error);
-                    throw error;
-                }
-
-                console.log('[AUTH] Login successful');
-
-                // Show success and redirect
-                successDiv.textContent = 'Login successful! Redirecting...';
-                successDiv.style.display = 'block';
-
-                setTimeout(() => {
-                    window.location.href = '/app';
-                }, 1000);
-            } catch (error) {
-                console.error('[AUTH] Login failed:', error);
-                errorDiv.textContent = error.message || 'Login failed. Please try again.';
-                errorDiv.style.display = 'block';
-                loginButton.disabled = false;
-                loading.style.display = 'none';
-            }
-        });
+        document.getElementById('login-form').addEventListener('submit', (e) => handleLogin(e, authClient));
     </script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>

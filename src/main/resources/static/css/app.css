@@ -1,0 +1,490 @@
+/* Styles specific to the app page */
+
+h1 {
+    margin-bottom: 10px;
+}
+
+.welcome-message {
+    color: #666;
+    font-size: 18px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.logout-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+
+.profile-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.profile-button:hover {
+    background-color: #218838;
+}
+
+.button-group {
+    margin-bottom: 20px;
+}
+
+/* Notes Section Styles */
+.notes-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.notes-section h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.add-note-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.add-note-button:hover {
+    background-color: #218838;
+}
+
+.notes-list {
+    margin-top: 20px;
+}
+
+.note-item {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.note-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.note-item h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.note-item .note-content {
+    color: #666;
+    font-size: 14px;
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+}
+
+.note-item .note-meta {
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.note-item .note-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.note-item button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.note-item .edit-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.note-item .edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.note-item .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.note-item .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.empty-notes {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+/* Note Form Modal */
+.note-form-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-form-modal.active {
+    display: flex;
+}
+
+.note-form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.note-form-container h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.note-form-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: bold;
+}
+
+.note-form-container input[type="text"],
+.note-form-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+.note-form-container textarea {
+    min-height: 200px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+}
+
+.note-form-container .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.note-form-container .save-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.note-form-container .save-btn:hover {
+    background-color: #218838;
+}
+
+.note-form-container .cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.note-form-container .cancel-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Note Detail Modal */
+.note-detail-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-detail-modal.active {
+    display: flex;
+}
+
+.note-detail-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.note-detail-container h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.note-detail-content {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-left: 4px solid #007bff;
+}
+
+.note-detail-meta {
+    color: #999;
+    font-size: 13px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.note-detail-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.note-detail-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.note-detail-actions .close-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.note-detail-actions .close-btn:hover {
+    background-color: #5a6268;
+}
+
+.note-detail-actions .edit-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.note-detail-actions .edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.note-detail-actions .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.note-detail-actions .delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* Trip Plan Styles */
+.trip-plan-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.trip-plan-section h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.generate-plan-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.generate-plan-button:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.generate-plan-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.plan-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-left: 4px solid #f39c12;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    color: #856404;
+}
+
+.plan-warning a {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.plan-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-left: 4px solid #17a2b8;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    color: #0c5460;
+    font-size: 13px;
+}
+
+.trip-plan-item {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.trip-plan-item .plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.trip-plan-item .plan-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.trip-plan-item .plan-content {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.trip-plan-item .plan-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+}
+
+.trip-plan-item .plan-rating label {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+}
+
+.star-rating {
+    display: inline-flex;
+    gap: 5px;
+}
+
+.star-rating .star {
+    font-family: "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", Arial, sans-serif;
+    font-size: 24px;
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.star-rating .star.filled {
+    color: #ffc107;
+}
+
+.star-rating .star:hover,
+.star-rating .star.hover {
+    color: #ffc107;
+}
+
+.generating-plan {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+.generating-plan .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #28a745;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

@@ -99,7 +99,8 @@ const mockAuth = {
      */
     signOut: async function() {
         try {
-            const session = this.getSession();
+            const sessionResponse = this.getSession();
+            const session = sessionResponse?.data?.session;
             if (session && session.access_token) {
                 await fetch('/api/mock-auth/logout', {
                     method: 'POST',
